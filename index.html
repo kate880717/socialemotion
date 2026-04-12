@@ -169,8 +169,19 @@
     const isGAS = typeof google !== "undefined" && typeof google.script !== "undefined";
     const GAS_URL = "https://script.google.com/macros/s/AKfycbyvAgyKarco76Zwn8OjYU_oewaYhh0jTg-pWNnffQ4tMOy4UQvOIoGYAPpjhl-qZ1ctDA/exec";
     const callGAS = async (action, payload = {}) => {
-      if (GAS_URL === "https://script.google.com/macros/s/AKfycbyvAgyKarco76Zwn8OjYU_oewaYhh0jTg-pWNnffQ4tMOy4UQvOIoGYAPpjhl-qZ1ctDA/exec" || !GAS_URL.startsWith("http")) return null;
-      try { const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action, ...payload }) }); const j = await r.json(); return j.success ? j.data : null; } catch (e) { return null; }
+      if (!GAS_URL.startsWith("http")) return null;
+      try { 
+        const r = await fetch(GAS_URL, { 
+          method: "POST", 
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action, ...payload }) 
+        }); 
+        const j = await r.json(); 
+        return j.success ? j.data : null; 
+      } catch (e) { 
+        console.error("fetch error:", e);
+        return null; 
+      }
     };
     const DEF_QUIZ = {
       set1: {
@@ -374,7 +385,7 @@
       }, []);
       useEffect(() => { stopSpeak(); }, [mId]);
       const handleSelect = id => { setMId(id); setActState("intro_act"); speak(MISSIONS.find(m => m.id === id)?.feedUp || ""); };
-      const complete = res => { const nH = Math.max(hearts, mId); setHearts(nH); const nr = { ...records, [mission.title]: res?.record || "완료" }; setRecords(nr); setActState("outro"); if (mId === 8) { const rs = Object.entries(nr).map(([k, v]) => `[${k}] ${v}`).join(" | "); const pd = { 날짜: new Date().toLocaleString("ko-KR"), 이름: name || "이름없음", 획득하트: nH, 상세기록: rs, 학습완료: "수료 완료 🎓" }; if (isGAS) google.script.run.saveRecord(pd); else callGAS("saveRecord", { data: pd }); } };
+      const complete = res => { const nH = Math.max(hearts, mId); setHearts(nH); const nr = { ...records, [mission.title]: res?.record || "완료" }; setRecords(nr); setActState("outro"); const rs = Object.entries(nr).map(([k, v]) => `[${k}] ${v}`).join(" | "); const pd = { 날짜: new Date().toLocaleString("ko-KR"), 이름: name || "이름없음", 획득하트: nH, 상세기록: rs, 학습완료: mId === 8 ? "수료 완료 🎓" : `진행중 (미션 ${mId}/8)` }; if (isGAS) { google.script.run.saveRecord(pd); } else { callGAS("saveRecord", { data: pd }); } };
       const goNext = () => { stopSpeak(); if (mId < 8) { const nextId = mId + 1; setMId(nextId); setActState("intro_act"); speak(MISSIONS.find(m => m.id === nextId)?.feedUp || ""); } else setScreen("certificate"); };
       const toggleTTS = () => { const n = !ttsOn; window.__TTS__ = n; setTtsOn(n); if (n) speak("소리를 켰어요!"); };
       const handleNameSelect = (n, soundOn) => { setName(n); window.__TTS__ = soundOn; setTtsOn(soundOn); setScreen("dashboard"); if (soundOn) speak(n + " 친구, 새싹 학교에 온 걸 환영해!"); };
