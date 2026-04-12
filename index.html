@@ -167,9 +167,9 @@
   <script type="text/babel">
     const { useState, useEffect, useRef, useCallback } = React;
     const isGAS = typeof google !== "undefined" && typeof google.script !== "undefined";
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbwU-ZmolIc28QD2qkktr0ByumGvcwhFIA-kZ4qfJXmzRJaqEo90pBE3A-feKPTnz5UWSQ/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyvAgyKarco76Zwn8OjYU_oewaYhh0jTg-pWNnffQ4tMOy4UQvOIoGYAPpjhl-qZ1ctDA/exec";
     const callGAS = async (action, payload = {}) => {
-      if (GAS_URL === "https://script.google.com/macros/s/AKfycbwU-ZmolIc28QD2qkktr0ByumGvcwhFIA-kZ4qfJXmzRJaqEo90pBE3A-feKPTnz5UWSQ/exec" || !GAS_URL.startsWith("http")) return null;
+      if (GAS_URL === "https://script.google.com/macros/s/AKfycbyvAgyKarco76Zwn8OjYU_oewaYhh0jTg-pWNnffQ4tMOy4UQvOIoGYAPpjhl-qZ1ctDA/exec" || !GAS_URL.startsWith("http")) return null;
       try { const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action, ...payload }) }); const j = await r.json(); return j.success ? j.data : null; } catch (e) { return null; }
     };
     const DEF_QUIZ = {
@@ -233,7 +233,7 @@
           <div className="bg-white rounded-[3rem] shadow-2xl border-[8px] border-yellow-200 w-full max-w-2xl p-8 lg:p-10 flex flex-col items-center gap-4 lg:gap-6 anim-zoom max-h-full overflow-y-auto">
             <div className="text-[5rem] lg:text-[6rem] anim-float leading-none shrink-0 mt-2">🌱</div>
             <h1 className="text-4xl lg:text-5xl font-black text-slate-800 font-jua text-center leading-tight shrink-0">마음 튼튼<br /><span className="text-green-500">새싹 학교</span></h1>
-            
+
             <div className="w-full p-5 lg:p-6 bg-slate-50 rounded-[2rem] border-4 border-slate-200 flex flex-col gap-3 lg:gap-4 shrink-0">
               <p className="text-xl lg:text-2xl font-black text-slate-700 text-center font-jua">🔊 소리를 켤까요?</p>
               <div className="flex gap-3 lg:gap-4">
@@ -293,10 +293,10 @@
         </div>
       </div>
     );
-    const AWeather = ({ onDone }) => { 
-      const [sel, setSel] = useState(null); 
+    const AWeather = ({ onDone }) => {
+      const [sel, setSel] = useState(null);
       useEffect(() => { speak("오늘 내 마음의 날씨는 어때요?"); }, []);
-      return (<div className="flex flex-col h-full w-full p-4 lg:p-6 gap-3 lg:gap-4 anim-zoom max-w-4xl mx-auto min-h-0"><h2 className="text-3xl lg:text-4xl font-black text-sky-700 font-jua text-center shrink-0 mb-1 lg:mb-2">오늘 내 마음의 날씨는 어때요? ☁️</h2>{!sel ? (<div className="grid grid-cols-2 gap-3 lg:gap-4 flex-1 min-h-0 w-full">{WEATHER.map(w => (<button key={w.id} onClick={() => { setSel(w); speak(w.desc + " " + w.tip); }} className={`${w.bg} text-white rounded-[2rem] flex flex-col items-center justify-center gap-2 lg:gap-3 shadow-lg active:scale-95 transition-transform p-3 lg:p-4 min-h-0`}><span className="text-[4rem] lg:text-[5rem] leading-none shrink-0">{w.icon}</span><span className="text-2xl lg:text-3xl font-black font-jua">{w.label}</span></button>))}</div>) : (<div className="flex flex-col items-center gap-3 lg:gap-4 flex-1 justify-center anim-zoom w-full min-h-0 max-h-full"><div className={`w-24 h-24 lg:w-32 lg:h-32 rounded-full ${sel.bg} flex items-center justify-center text-[4rem] lg:text-[5rem] shadow-xl shrink-0 my-1`}>{sel.icon}</div><div className="bg-white p-5 lg:p-6 rounded-[2rem] w-full max-w-2xl border-[6px] border-slate-100 text-center shadow-2xl flex-1 flex flex-col justify-center min-h-0 max-h-full overflow-y-auto"><p className="text-2xl lg:text-3xl font-black text-slate-700 mb-3 lg:mb-4 break-keep leading-tight shrink-0">{sel.desc}</p><p className="text-xl lg:text-2xl font-bold text-slate-500 bg-slate-50 p-4 lg:p-5 rounded-2xl break-keep leading-snug min-h-0 shrink-0">{sel.tip}</p></div><button onClick={() => onDone({ record: `내 기분: ${sel.label} ${sel.icon}` })} className="w-full max-w-2xl py-4 lg:py-5 bg-green-500 text-white rounded-2xl text-2xl lg:text-3xl font-black shadow-[0_6px_0_#15803d] lg:shadow-[0_8px_0_#15803d] anim-bounce font-jua flex justify-center items-center gap-3 shrink-0 mt-1">확인했어요! <ICheck s={30} /></button></div>)}</div>); 
+      return (<div className="flex flex-col h-full w-full p-4 lg:p-6 gap-3 lg:gap-4 anim-zoom max-w-4xl mx-auto min-h-0"><h2 className="text-3xl lg:text-4xl font-black text-sky-700 font-jua text-center shrink-0 mb-1 lg:mb-2">오늘 내 마음의 날씨는 어때요? ☁️</h2>{!sel ? (<div className="grid grid-cols-2 gap-3 lg:gap-4 flex-1 min-h-0 w-full">{WEATHER.map(w => (<button key={w.id} onClick={() => { setSel(w); speak(w.desc + " " + w.tip); }} className={`${w.bg} text-white rounded-[2rem] flex flex-col items-center justify-center gap-2 lg:gap-3 shadow-lg active:scale-95 transition-transform p-3 lg:p-4 min-h-0`}><span className="text-[4rem] lg:text-[5rem] leading-none shrink-0">{w.icon}</span><span className="text-2xl lg:text-3xl font-black font-jua">{w.label}</span></button>))}</div>) : (<div className="flex flex-col items-center gap-3 lg:gap-4 flex-1 justify-center anim-zoom w-full min-h-0 max-h-full"><div className={`w-24 h-24 lg:w-32 lg:h-32 rounded-full ${sel.bg} flex items-center justify-center text-[4rem] lg:text-[5rem] shadow-xl shrink-0 my-1`}>{sel.icon}</div><div className="bg-white p-5 lg:p-6 rounded-[2rem] w-full max-w-2xl border-[6px] border-slate-100 text-center shadow-2xl flex-1 flex flex-col justify-center min-h-0 max-h-full overflow-y-auto"><p className="text-2xl lg:text-3xl font-black text-slate-700 mb-3 lg:mb-4 break-keep leading-tight shrink-0">{sel.desc}</p><p className="text-xl lg:text-2xl font-bold text-slate-500 bg-slate-50 p-4 lg:p-5 rounded-2xl break-keep leading-snug min-h-0 shrink-0">{sel.tip}</p></div><button onClick={() => onDone({ record: `내 기분: ${sel.label} ${sel.icon}` })} className="w-full max-w-2xl py-4 lg:py-5 bg-green-500 text-white rounded-2xl text-2xl lg:text-3xl font-black shadow-[0_6px_0_#15803d] lg:shadow-[0_8px_0_#15803d] anim-bounce font-jua flex justify-center items-center gap-3 shrink-0 mt-1">확인했어요! <ICheck s={30} /></button></div>)}</div>);
     };
     const AQuiz = ({ setKey, onDone, quizSets }) => {
       const [qi, setQi] = useState(0); const [fb, setFb] = useState(null);
