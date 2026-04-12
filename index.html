@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>마음 튼튼 새싹 학교</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ["Noto Sans KR", "sans-serif"], jua: ["Jua", "sans-serif"] } } } }</script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html,
+    body,
+    #root {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden
+    }
+
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background: #f0fdf4;
+      touch-action: manipulation
+    }
+
+    .font-jua {
+      font-family: "Jua", sans-serif
+    }
+
+    @keyframes zoomIn {
+      from {
+        opacity: 0;
+        transform: scale(.7)
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1)
+      }
+    }
+
+    .anim-zoom {
+      animation: zoomIn .35s cubic-bezier(.175, .885, .32, 1.275) both
+    }
+
+    @keyframes floatY {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-12px)
+      }
+    }
+
+    .anim-float {
+      animation: floatY 2.5s ease-in-out infinite
+    }
+
+    @keyframes hb {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      30% {
+        transform: scale(1.45)
+      }
+
+      60% {
+        transform: scale(1)
+      }
+    }
+
+    .anim-hb {
+      animation: hb 1.4s ease-in-out infinite
+    }
+
+    @keyframes pulse2 {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .35
+      }
+    }
+
+    .anim-pulse {
+      animation: pulse2 1.5s ease-in-out infinite
+    }
+
+    @keyframes bounceBtn {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-7px)
+      }
+    }
+
+    .anim-bounce {
+      animation: bounceBtn 1s ease-in-out infinite
+    }
+
+    @keyframes spin360 {
+      from {
+        transform: rotate(0)
+      }
+
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .anim-spin {
+      animation: spin360 .6s ease-in-out
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    .anim-fade {
+      animation: fadeIn .4s ease both
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+      width: 6px
+    }
+
+    .sidebar-scroll::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 6px
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+    const isGAS = typeof google !== "undefined" && typeof google.script !== "undefined";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwyNyftMDwmJ9QA8byP0N_kvZoesglVemNBnjfdItVS9-GbgC8973ft5zK6AXg-bN623w/exec";
+    const callGAS = async (action, payload = {}) => {
+      if (GAS_URL === "https://script.google.com/macros/s/AKfycbwyNyftMDwmJ9QA8byP0N_kvZoesglVemNBnjfdItVS9-GbgC8973ft5zK6AXg-bN623w/exec" || !GAS_URL.startsWith("http")) return null;
+      try { const r = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action, ...payload }) }); const j = await r.json(); return j.success ? j.data : null; } catch (e) { return null; }
+    };
+    const DEF_QUIZ = {
+      set1: {
+        title: "상황 속 마음 퀴즈", qs: [
+          { q: "친구가 넘어져 무릎에서 피가 나고 있어. 어떤 마음이 들까?", o1: "별로 상관없어. 그냥 지나쳐 가요 😶", o2: "친구가 많이 아프겠다. 걱정되는 마음이에요 😢", a: 2, fb: "다친 친구를 걱정해주는 네 마음이 정말 따뜻해!" },
+          { q: "선생님이 어려운 질문을 하셨는데 정답을 모르겠어.", o1: "모를 때는 그냥 조용히 있어요 😶", o2: "손을 들고 다시 설명해 주세요 라고 말해요 🙋", a: 2, fb: "모르는 건 부끄러운 게 아니야! 씩씩하게 말해줘서 멋져!" }
+        ]
+      },
+      set2: {
+        title: "예쁜 말 퀴즈", qs: [
+          { q: "친구가 내 장난감을 빌려달라고 해.", o1: "지금은 내가 놀고 있어. 조금만 기다려 줄 수 있어? 😊", o2: "싫다고 소리를 지르며 가버려요 😠", a: 1, fb: "부드럽게 말하면 친구도 잘 기다려줄 거야!" },
+          { q: "수업 중에 복도에서 뛰고 싶은 마음이 들어.", o1: "신나서 빠르게 뛰어갑니다 🏃", o2: "꾹 참고 사뿐사뿐 고양이처럼 걸어가요 🐈", a: 2, fb: "모두의 안전을 위해 규칙을 지키는 네가 최고야!" }
+        ]
+      },
+      set3: {
+        title: "학교 생활 퀴즈", qs: [
+          { q: "급식실에서 새우튀김을 더 먹고 싶어.", o1: "친구 것을 몰래 하나 가져와요 🙈", o2: "줄을 서서 선생님께 조금 더 달라고 말씀드려요 😇", a: 2, fb: "차례를 지키고 말로 표현하는 모습, 100점 만점!" },
+          { q: "화장실이 너무 급해졌어. 수업 중인데 어떻게 할까?", o1: "부끄러워서 꾹 참아요 😖", o2: "손을 들고 선생님께 조용히 말씀드려요 🙋", a: 2, fb: "용기 있게 말씀드리는 것이 훨씬 현명해!" }
+        ]
+      }
+    }; window.__TTS__ = false; let __ttsT = null;
+    const speak = (txt, rate = 0.85, pitch = 1.0) => { if (!window.speechSynthesis || !window.__TTS__ || !txt) return; const synth = window.speechSynthesis; synth.cancel(); clearTimeout(__ttsT); __ttsT = setTimeout(() => { const u = new SpeechSynthesisUtterance(txt); const sv = () => { const vv = synth.getVoices(); let v = vv.find(v => v.lang === 'ko-KR' && v.name.includes('Google')); if (!v) v = vv.find(v => v.lang === 'ko-KR'); if (v) u.voice = v; }; synth.getVoices().length === 0 ? synth.addEventListener("voiceschanged", sv, { once: true }) : sv(); u.rate = rate; u.pitch = pitch; synth.speak(u); }, 50); };
+    const stopSpeak = () => { clearTimeout(__ttsT); window.speechSynthesis && window.speechSynthesis.cancel(); };
+    const IVol = ({ s = 24, c = "" }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={c}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M15.54 8.46a5 5 0 0 1 0 7.07" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14" /></svg>;
+    const IMute = ({ s = 24, c = "" }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={c}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><line x1="23" y1="9" x2="17" y2="15" /><line x1="17" y1="9" x2="23" y2="15" /></svg>;
+    const IBack = ({ s = 24 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>;
+    const ICheck = ({ s = 24 }) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="9 12 12 15 16 9" /></svg>;
+    const IHeart = ({ s = 24, fill = "none", c = "" }) => <svg width={s} height={s} viewBox="0 0 24 24" fill={fill} stroke={fill === "none" ? "currentColor" : fill} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={c}><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>;
+    const WEATHER = [
+      { id: "sunny", icon: "☀️", label: "맑음", bg: "bg-amber-400", desc: "기분이 하늘을 날 것 같아요!", tip: "오늘의 행복을 친구에게도 나눠주세요." },
+      { id: "cloudy", icon: "⛅", label: "흐림", bg: "bg-slate-400", desc: "좋지도 나쁘지도 않은 기분이에요.", tip: "재미있는 그림책을 읽어보는 건 어때요?" },
+      { id: "rainy", icon: "🌧️", label: "비", bg: "bg-blue-500", desc: "조금 슬프고 눈물이 날 것 같아요.", tip: "선생님이나 부모님께 속마음을 이야기해 보세요." },
+      { id: "storm", icon: "⚡", label: "번개", bg: "bg-red-500", desc: "마음속에서 쾅쾅! 화가 났어요.", tip: "눈을 감고 후~ 풍선 호흡을 해보세요." },
+    ];
+    const MISSIONS = [
+      { id: 1, chap: 1, chapName: "1장. 감정 알기", chapColor: "green", type: "quiz", set: "set1", title: "내 감정 찾기", icon: "🤔", feedUp: "이럴 때는 어떤 마음을 가져야 올바를까?", feedFwd: "상황에 맞는 마음을 잘 찾았어! 정말 훌륭해!" },
+      { id: 2, chap: 1, chapName: "1장. 감정 알기", chapColor: "green", type: "weather", title: "마음 날씨", icon: "☀️", feedUp: "지금 내 마음속 날씨는 어떤지 골라보자!", feedFwd: "솔직하게 내 마음을 마주하는 것이 가장 중요해!" },
+      { id: 3, chap: 2, chapName: "2장. 감정 표현하기", chapColor: "orange", type: "quiz", set: "set2", title: "예쁜 말 퀴즈", icon: "💬", feedUp: "친구와 사이좋게 지내려면 어떻게 표현해야 할까?", feedFwd: "예쁜 말은 친구의 마음을 따뜻하게 만들어!" },
+      { id: 4, chap: 2, chapName: "2장. 감정 표현하기", chapColor: "orange", type: "bandage", title: "마음 반창고", icon: "🩹", feedUp: "친구가 속상해해요. 마음 반창고를 붙여줄래요?", feedFwd: "따뜻하게 감싸주니까 친구가 정말 기뻐해!" },
+      { id: 5, chap: 3, chapName: "3장. 감정 조절하기", chapColor: "blue", type: "breath", title: "풍선 호흡", icon: "🎈", feedUp: "화가 나면 풍선을 7번 크게 불어보자!", feedFwd: "후~ 마음이 편안해졌지? 화가 날 땐 심호흡을 해봐!" },
+      { id: 6, chap: 3, chapName: "3장. 감정 조절하기", chapColor: "blue", type: "scrub", title: "마음 지우개", icon: "🧽", feedUp: "나쁜 감정을 손가락으로 쓱쓱 지워보자!", feedFwd: "화난 기분이 싹 지워졌어! 마음이 한결 가볍지?" },
+      { id: 7, chap: 4, chapName: "4장. 내 마음 다스리기", chapColor: "purple", type: "record", title: "나의 다짐", icon: "🎤", feedUp: "마음이 튼튼해지기 위해 무엇을 할지 약속해봐요!", feedFwd: "멋진 다짐이야! 앞으로도 꼭 실천해 보자!" },
+      { id: 8, chap: 4, chapName: "4장. 내 마음 다스리기", chapColor: "purple", type: "finish", title: "수료증 받기", icon: "🎓", feedUp: "우와! 모든 훈련을 무사히 마쳤어! 수료증을 받자!", feedFwd: "앞으로도 멋지게 활약할 너를 항상 응원할게!" },
+    ];
+    const CS = {
+      green: { hdr: "from-green-500 to-emerald-600", active: "border-green-400 bg-white shadow-green-200 shadow-md", ring: "ring-green-300" },
+      blue: { hdr: "from-blue-500 to-sky-600", active: "border-blue-400 bg-white shadow-blue-200 shadow-md", ring: "ring-blue-300" },
+      orange: { hdr: "from-orange-500 to-amber-600", active: "border-orange-400 bg-white shadow-orange-200 shadow-md", ring: "ring-orange-300" },
+      purple: { hdr: "from-purple-500 to-violet-600", active: "border-purple-400 bg-white shadow-purple-200 shadow-md", ring: "ring-purple-300" },
+    };
+    const CC = ["green", "orange", "blue", "purple"];
+    const NBC = ["bg-rose-400", "bg-orange-400", "bg-amber-500", "bg-lime-500", "bg-teal-500", "bg-cyan-500", "bg-blue-500", "bg-violet-500", "bg-pink-500", "bg-emerald-500"];
+    const Loading = () => (<div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-yellow-300 to-green-400"><div className="bg-white p-10 rounded-[3rem] shadow-2xl flex flex-col items-center gap-4"><div className="text-[5rem] anim-float">🌱</div><p className="text-3xl font-black text-slate-600 font-jua anim-pulse">불러오는 중...</p></div></div>);
+    const NameSelect = ({ names, onSelect }) => {
+      const [useSound, setUseSound] = useState(null);
+      const [selName, setSelName] = useState("");
+      return (
+        <div className="w-full h-full bg-gradient-to-b from-yellow-300 to-green-400 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[3rem] shadow-2xl border-[8px] border-yellow-200 w-full max-w-2xl p-10 flex flex-col items-center gap-8 anim-zoom">
+            <div className="text-[6rem] anim-float leading-none">🌱</div>
+            <h1 className="text-5xl lg:text-6xl font-black text-slate-800 font-jua text-center leading-tight">마음 튼튼<br /><span className="text-green-500">새싹 학교</span></h1>
+            <p className="text-2xl font-bold text-slate-500 text-center">내 기분을 알고, 사이좋게 지내요!</p>
+
+            <div className="w-full p-6 bg-slate-50 rounded-[2rem] border-4 border-slate-200 flex flex-col gap-4">
+              <p className="text-2xl font-black text-slate-700 text-center font-jua">🔊 소리를 켤까요?</p>
+              <div className="flex gap-4">
+                <button onClick={() => setUseSound(true)} className={`flex-1 py-4 text-2xl font-black font-jua rounded-[1.5rem] transition-all shadow-md active:translate-y-1 ${useSound === true ? "bg-green-500 text-white border-b-4 border-green-700" : "bg-white text-slate-600 border-b-4 border-slate-300"}`}>네, 켤래요! 😊</button>
+                <button onClick={() => setUseSound(false)} className={`flex-1 py-4 text-2xl font-black font-jua rounded-[1.5rem] transition-all shadow-md active:translate-y-1 ${useSound === false ? "bg-slate-500 text-white border-b-4 border-slate-700" : "bg-white text-slate-600 border-b-4 border-slate-300"}`}>아니요 😶</button>
+              </div>
+            </div>
+
+            {useSound !== null && (
+              <div className="w-full anim-zoom">
+                <p className="text-2xl font-black text-slate-700 text-center mb-4 font-jua">내 이름을 고르고 시작해요! 👇</p>
+                <div className="flex gap-4">
+                  <select value={selName} onChange={e => setSelName(e.target.value)} className="flex-1 p-5 bg-white border-[4px] border-slate-200 rounded-[1.5rem] text-3xl font-black text-center font-jua text-slate-700 focus:outline-none focus:border-green-400">
+                    <option value="" disabled>이름 선택</option>
+                    {names.map(n => (<option key={n} value={n}>{n}</option>))}
+                  </select>
+                  <button onClick={() => { if (!selName) { alert("이름을 골라주세요!"); return; } onSelect(selName, useSound) }} className="px-8 py-5 bg-green-500 text-white rounded-[1.5rem] text-3xl font-black font-jua shadow-[0_6px_0_#15803d] active:translate-y-1 active:shadow-none whitespace-nowrap">시작! 🚀</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+    const Sidebar = ({ hearts, mId, records, ttsOn, toggleTTS, onSelect }) => (
+      <div className="h-full flex flex-col bg-slate-50/50 border-r-2 border-slate-100 shadow-2xl relative z-30" style={{ width: "340px", minWidth: "340px" }}>
+        <div className="bg-gradient-to-b from-green-500 to-emerald-600 px-6 py-5 shrink-0 flex items-center justify-between shadow-md">
+          <h1 className="text-3xl lg:text-4xl font-black text-white font-jua break-keep tracking-tight">🌱 마음튼튼</h1>
+          <button onClick={toggleTTS} className="p-3 bg-white/20 rounded-full text-white active:scale-95 shrink-0 flex items-center justify-center">{ttsOn ? <IVol s={28} /> : <IMute s={28} />}</button>
+        </div>
+        <div className="flex-1 overflow-y-auto sidebar-scroll p-3 space-y-3">
+          {[1, 2, 3, 4].map(n => {
+            const ms = MISSIONS.filter(m => m.chap === n); const cs = CS[CC[n - 1]]; return (
+              <div key={n} className="mb-1">
+                <div className={`bg-gradient-to-r ${cs.hdr} text-white xl:text-3xl text-2xl font-black font-jua px-5 py-3 rounded-[1.5rem] mb-3 shadow-sm`}>{ms[0].chapName}</div>
+                <div className="space-y-3 pl-1">{ms.map(m => {
+                  const locked = hearts < m.id - 1 && mId < m.id; const active = mId === m.id; const done = records[m.title] !== undefined || hearts >= m.id; return (
+                    <button key={m.id} disabled={locked && !done} onClick={() => onSelect(m.id)} className={`w-full flex items-center gap-3 px-4 py-4 rounded-[1.2rem] border-[4px] transition-all text-left ${active ? `${cs.active} ring-4 ${cs.ring}` : done ? "bg-white border-slate-200 opacity-90 shadow-sm" : locked ? "bg-slate-50 border-slate-100 opacity-40 cursor-not-allowed" : "bg-white border-slate-200 hover:bg-slate-50 shadow-sm"}`}>
+                      <span className="text-[2.5rem] lg:text-[3rem] leading-none shrink-0">{m.icon}</span>
+                      <span className={`text-xl lg:text-2xl font-black leading-tight break-keep ${active ? "text-slate-800" : "text-slate-500"}`}>{m.title}</span>
+                      {done && <IHeart fill="#ef4444" c="text-red-400 ml-auto shrink-0" s={28} />}
+                      {locked && !done && <span className="ml-auto text-slate-300 text-2xl lg:text-3xl shrink-0">🔒</span>}
+                    </button>);
+                })}</div>
+              </div>);
+          })}
+        </div>
+      </div>
+    );
+    const AWeather = ({ onDone }) => { const [sel, setSel] = useState(null); return (<div className="flex flex-col h-full w-full p-6 lg:p-8 gap-4 lg:gap-6 anim-zoom max-w-5xl mx-auto"><h2 className="text-4xl lg:text-5xl font-black text-sky-700 font-jua text-center shrink-0 mb-2 lg:mb-4">오늘 내 마음의 날씨는 어때요? ☁️</h2>{!sel ? (<div className="grid grid-cols-2 gap-4 lg:gap-6 flex-1 min-h-0 w-full">{WEATHER.map(w => (<button key={w.id} onClick={() => { setSel(w); speak(w.desc + " " + w.tip); }} className={`${w.bg} text-white rounded-[2.5rem] flex flex-col items-center justify-center gap-4 lg:gap-5 shadow-xl active:scale-95 transition-transform p-4 lg:p-6 min-h-0`}><span className="text-[5rem] lg:text-[7rem] leading-none shrink-0">{w.icon}</span><span className="text-4xl lg:text-5xl font-black font-jua">{w.label}</span></button>))}</div>) : (<div className="flex flex-col items-center gap-6 lg:gap-8 flex-1 justify-center anim-zoom w-full min-h-0"><div className={`w-40 h-40 lg:w-48 lg:h-48 rounded-full ${sel.bg} flex items-center justify-center text-[5rem] lg:text-[7rem] shadow-2xl shrink-0`}>{sel.icon}</div><div className="bg-white p-8 lg:p-12 rounded-[3rem] w-full border-[8px] border-slate-100 text-center shadow-2xl flex-1 flex flex-col justify-center min-h-0 overflow-y-auto"><p className="text-4xl lg:text-5xl font-black text-slate-700 mb-6 lg:mb-8 break-keep leading-tight">{sel.desc}</p><p className="text-3xl lg:text-4xl font-bold text-slate-500 bg-slate-50 p-6 lg:p-8 rounded-[2rem] break-keep leading-snug">{sel.tip}</p></div><button onClick={() => onDone({ record: `내 기분: ${sel.label} ${sel.icon}` })} className="w-full py-6 lg:py-8 bg-green-500 text-white rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#15803d] lg:shadow-[0_10px_0_#15803d] anim-bounce font-jua flex justify-center items-center gap-4 shrink-0">확인했어요! <ICheck s={40} /></button></div>)}</div>); };
+    const AQuiz = ({ setKey, onDone, quizSets }) => {
+      const [qi, setQi] = useState(0); const [fb, setFb] = useState(null);
+      const setInfo = quizSets && quizSets[setKey] ? quizSets[setKey] : DEF_QUIZ[setKey];
+      const qs = setInfo.qs;
+      const q = qs[qi]; const isLast = qi === qs.length - 1;
+      useEffect(() => { speak(q.q); }, [qi]);
+      const ans = n => { const ok = n === q.a; if (ok) confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); setFb({ ok, msg: ok ? "딩동댕! " + q.fb : "앗! 그건 너무 이상한 마음 아닐까?" }); speak(ok ? "딩동댕! " + q.fb : "상황에 어울리지 않는 행동 같아요!"); };
+      return (<div className="flex flex-col h-full w-full p-6 lg:p-8 gap-4 lg:gap-6 relative anim-zoom max-w-5xl mx-auto">
+        <div className="bg-white p-8 lg:p-10 rounded-[3rem] shadow-2xl border-[8px] border-yellow-200 flex-1 flex flex-col justify-center relative min-h-0 overflow-y-auto">
+          <span className="absolute top-4 left-4 lg:top-6 lg:left-6 bg-yellow-100 text-yellow-800 px-5 py-3 lg:px-6 lg:py-4 rounded-full font-black text-2xl lg:text-3xl">{qi + 1}/{qs.length}</span>
+          <button onClick={() => speak(q.q)} className="absolute top-4 right-4 lg:top-6 lg:right-6 p-4 lg:p-5 bg-yellow-100 rounded-full text-yellow-600 active:scale-95 shadow-md"><IVol s={36} c="lg:w-11 lg:h-11 w-9 h-9" /></button>
+          <h2 className="text-3xl lg:text-5xl font-black text-slate-800 leading-normal lg:leading-loose break-keep mt-5 text-center px-4">{q.q}</h2>
+        </div>
+        <div className="flex flex-col gap-3 lg:gap-4 shrink-0 mt-2">
+          <button onClick={() => ans(1)} className="w-full py-5 lg:py-6 bg-white rounded-[2rem] shadow-lg border-b-[6px] border-slate-200 active:translate-y-1 active:border-b-0 text-2xl lg:text-3xl font-bold text-slate-700 px-6 lg:px-8 text-left break-keep leading-relaxed hover:bg-slate-50 min-h-[4rem] flex items-center">{q.o1}</button>
+          <button onClick={() => ans(2)} className="w-full py-5 lg:py-6 bg-white rounded-[2rem] shadow-lg border-b-[6px] border-slate-200 active:translate-y-1 active:border-b-0 text-2xl lg:text-3xl font-bold text-slate-700 px-6 lg:px-8 text-left break-keep leading-relaxed hover:bg-slate-50 min-h-[4rem] flex items-center">{q.o2}</button>
+        </div>
+        {fb && (<div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 anim-zoom z-20"><div className="bg-white p-6 lg:p-10 rounded-[3rem] w-full max-w-3xl shadow-2xl border-[8px] border-yellow-300 text-center flex flex-col justify-center min-h-0 max-h-full"><div className="text-[5rem] lg:text-[6rem] mb-2 shrink-0">{fb.ok ? "🎉" : "🤔"}</div><h3 className={`text-3xl lg:text-5xl font-black mb-4 font-jua shrink-0 ${fb.ok ? "text-green-600" : "text-orange-500"}`}>{fb.ok ? "정답이에요!" : "정말 그럴까요?"}</h3><div className="overflow-y-auto mb-6"><p className="text-2xl lg:text-3xl font-bold text-slate-700 break-keep leading-snug bg-slate-50 p-5 lg:p-6 rounded-[2rem]">{fb.msg}</p></div>{fb.ok ? (isLast ? <button onClick={() => onDone({ record: setInfo.title + " 성공 🌟" })} className="w-full py-5 lg:py-6 bg-green-500 text-white rounded-[2rem] text-2xl lg:text-3xl font-black shadow-[0_6px_0_#166534] active:translate-y-1 active:shadow-none font-jua shrink-0">완료! 🌟</button> : <button onClick={() => { setFb(null); setQi(i => i + 1); }} className="w-full py-5 lg:py-6 bg-blue-500 text-white rounded-[2rem] text-2xl lg:text-3xl font-black shadow-[0_6px_0_#1e40af] active:translate-y-1 active:shadow-none font-jua shrink-0">다음 문제 ▶</button>) : <button onClick={() => setFb(null)} className="w-full py-5 lg:py-6 bg-orange-400 text-white rounded-[2rem] text-2xl lg:text-3xl font-black shadow-[0_6px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua shrink-0">다시 생각하기 ↺</button>}</div></div>)}
+      </div>);
+    };
+    const ABreath = ({ onDone }) => {
+      const [scale, setScale] = useState(1); const [done, setDone] = useState(0); const [fin, setFin] = useState(false);
+      const ref = useRef(null); const total = 7;
+      useEffect(() => { speak("풍선을 일곱 번 크게 불어봐요. 꾹 눌러보세요!"); }, []);
+      const start = () => { if (fin) return; ref.current = setInterval(() => { setScale(s => { if (s >= 5) { clearInterval(ref.current); setScale(1); setDone(d => { const n = d + 1; if (n >= total) { setFin(true); speak("마음이 한결 편안해졌죠? 대단해요!"); confetti({ particleCount: 150, spread: 100 }); } else { speak(["잘했어요!", "오! 좋아요!", "대단해요!", "조금만 더!"][n % 4] + " 다음 풍선도 크게 불어봐요."); } return n; }); return 1; } return s + 0.35; }); }, 30); };
+      const stop = () => { if (!fin) { clearInterval(ref.current); setScale(1); } };
+      const face = done >= 7 ? "😇" : done >= 4 ? "🙂" : done >= 2 ? "😐" : "😡";
+      const faceWord = done >= 7 ? "평온함" : done >= 4 ? "나아짐" : done >= 2 ? "조금 화남" : "화가 남";
+      return (<div className="flex flex-col items-center justify-center h-full gap-4 lg:gap-8 p-6 lg:p-8 select-none anim-zoom max-w-4xl mx-auto w-full min-h-0"><div className="text-center shrink-0"><h2 className="text-4xl lg:text-5xl font-black text-blue-600 font-jua">풍선 호흡하기 🎈</h2><div className="mt-2 lg:mt-4 bg-blue-100 text-blue-800 px-6 py-2 lg:px-8 lg:py-3 rounded-full font-black inline-block text-2xl lg:text-3xl">성공: {done} / {total}</div></div><div className="flex items-center gap-4 lg:gap-6 my-2 lg:my-4 flex-1 min-h-0"><div className="flex flex-col items-center shrink-0"><div className="text-[4rem] lg:text-[5rem] transition-all bg-white shadow-xl rounded-full w-28 h-28 lg:w-32 lg:h-32 flex items-center justify-center border-4 border-slate-200">{face}</div><span className="text-xl lg:text-2xl font-black text-slate-500 mt-2">{faceWord}</span></div><div className="w-64 h-64 lg:w-[24rem] lg:h-[24rem] bg-blue-50 rounded-[2.5rem] lg:rounded-[3rem] shadow-inner border-[12px] lg:border-[16px] border-blue-200 flex items-center justify-center overflow-hidden relative shrink-0"><div className="absolute top-4 left-4 text-3xl lg:text-4xl opacity-50">🎈</div><div className="bg-red-400 rounded-full shadow-2xl flex items-center justify-center" style={{ width: 80, height: 80, transform: `scale(${scale})` }}><span className="text-white text-2xl lg:text-3xl font-black font-jua">후~</span></div></div></div>{!fin ? <button onMouseDown={start} onMouseUp={stop} onMouseLeave={stop} onTouchStart={e => { e.preventDefault(); start(); }} onTouchEnd={stop} className="w-full py-6 lg:py-8 bg-blue-500 text-white rounded-[2rem] lg:rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#1e40af] lg:shadow-[0_10px_0_#1e40af] active:translate-y-2 active:shadow-none font-jua shrink-0">🎈 꾹~ 누르기</button> : <button onClick={() => onDone({ record: `풍선 호흡 ${total}번 완료` })} className="w-full py-6 lg:py-8 bg-green-500 text-white rounded-[2rem] lg:rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#166534] lg:shadow-[0_10px_0_#166534] anim-bounce font-jua shrink-0">마음이 편안해졌어! ✨</button>}</div>);
+    };
+    const AScrub = ({ onDone }) => {
+      const [dirt, setDirt] = useState(1); const hm = useCallback(() => setDirt(d => Math.max(0, d - 0.012)), []);
+      const face = dirt > 0.6 ? "😡" : dirt > 0.1 ? "😐" : "😊"; const done = dirt === 0;
+      const fb = dirt > 0.6 ? "bg-red-100 border-red-200" : dirt > 0.1 ? "bg-yellow-100 border-yellow-200" : "bg-green-100 border-green-200";
+      useEffect(() => { speak("나쁜 마음을 화면에서 손가락으로 쓱쓱 문질러 지워봐요!"); }, []);
+      useEffect(() => { if (done) { speak("와! 웃는 얼굴이 됐어! 나쁜 기분이 다 사라졌네!"); confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } }); } }, [done]);
+      return (<div className="flex flex-col items-center justify-center h-full gap-8 p-8 anim-zoom max-w-4xl mx-auto w-full" onMouseMove={hm} onTouchMove={e => { e.preventDefault(); hm(); }}><div className="text-center"><h2 className="text-5xl font-black text-green-700 font-jua mb-2">마음 지우개 🧽</h2><p className="text-slate-500 font-bold text-4xl mt-3 leading-snug">화면을 손가락으로<br />쓱쓱 문질러요!</p></div><div className={`relative w-80 h-80 lg:w-[28rem] lg:h-[28rem] ${fb} rounded-full shadow-2xl border-[20px] overflow-hidden transition-colors duration-500 my-4`}><div className="absolute inset-0 flex items-center justify-center text-[10rem] lg:text-[14rem] anim-float">{face}</div><div className="absolute inset-0 bg-slate-800" style={{ opacity: dirt * 0.5 }}></div></div>{dirt > 0 ? (<div className="w-full space-y-5 max-w-3xl"><div className="flex justify-between text-4xl font-bold text-slate-400 px-3 mt-4"><span>😡 화남</span><span>😊 평온</span></div><div className="w-full h-12 bg-slate-200 rounded-full overflow-hidden shadow-inner"><div className="h-full bg-gradient-to-r from-red-500 to-green-500 rounded-full transition-all duration-100" style={{ width: `${(1 - dirt) * 100}%` }}></div></div></div>) : <button onClick={() => onDone({ record: "나쁜 마음 비우기 성공 🧹" })} className="w-full py-10 bg-green-600 text-white text-5xl font-black rounded-[2.5rem] anim-bounce shadow-[0_10px_0_#166534] font-jua mt-4">깨끗해졌어요! 😊</button>}</div>);
+    };
+    const ABandage = ({ onDone }) => {
+      const [stage, setStage] = useState(0);
+      useEffect(() => { speak("친구가 속상해서 울고 있어. 마음의 반창고를 붙여줄래?"); }, []);
+      const apply = () => { setStage(1); speak("따뜻한 반창고를 붙여줬구나! 이제 호~ 불어서 낫게 해줘."); setTimeout(() => { setStage(2); speak("와! 친구가 환하게 웃기 시작했어! 배려해줘서 고마워."); confetti({ particleCount: 150, spread: 100 }); }, 2500); };
+      return (<div className="flex flex-col items-center justify-center h-full gap-6 lg:gap-8 p-6 lg:p-8 anim-zoom max-w-4xl mx-auto w-full min-h-0"><h2 className="text-4xl lg:text-5xl font-black text-pink-600 font-jua text-center mb-2 lg:mb-4 shrink-0">마음 반창고 🩹</h2><div className="relative w-64 h-64 lg:w-[26rem] lg:h-[26rem] bg-white rounded-full shadow-2xl border-[16px] lg:border-[20px] border-pink-200 flex items-center justify-center overflow-visible my-2 lg:my-4 shrink-0"><div className="text-[8rem] lg:text-[12rem] transition-all duration-500">{["😭", "🤕", "🥰"][stage]}</div>{stage >= 1 && <div className="absolute top-8 right-8 lg:top-10 lg:right-10 text-[5rem] lg:text-[7rem] anim-zoom rotate-12">🩹</div>}{stage === 2 && <div className="absolute -bottom-4 lg:-bottom-6 left-1/2 -translate-x-1/2 text-3xl lg:text-5xl font-black text-pink-500 anim-bounce font-jua whitespace-nowrap bg-white/90 px-6 py-2 lg:px-8 lg:py-3 outline outline-6 lg:outline-8 outline-pink-200 rounded-full">정말 고마워! 💕</div>}</div>{stage === 0 && <button onClick={apply} className="w-full py-6 lg:py-8 bg-pink-400 text-white rounded-[2rem] lg:rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#be185d] lg:shadow-[0_10px_0_#be185d] active:translate-y-2 active:shadow-none font-jua mt-2 lg:mt-4 shrink-0">🩹 반창고 톡! 붙이기</button>}{stage === 1 && <p className="text-3xl lg:text-4xl font-black text-pink-500 anim-pulse font-jua mt-2 lg:mt-4 bg-pink-50 px-8 py-4 lg:px-10 lg:py-5 rounded-full border-4 border-pink-200 shadow-md shrink-0">호~ 불어주는 중...</p>}{stage === 2 && <button onClick={() => onDone({ record: "마음 반창고 붙이기 완료 🩹" })} className="w-full py-6 lg:py-8 bg-pink-500 text-white text-3xl lg:text-5xl font-black rounded-[2rem] lg:rounded-[2.5rem] shadow-[0_8px_0_#9d174d] lg:shadow-[0_10px_0_#9d174d] anim-bounce font-jua mt-2 lg:mt-4 shrink-0">성공! 확인하기 ✅</button>}</div>);
+    };
+    const AMissionRecord = ({ onDone, name }) => {
+      const [state, setState] = useState("idle"); const [url, setUrl] = useState("");
+      const mediaRecorder = useRef(null); const chunks = useRef([]);
+      useEffect(() => { speak("내가 마음이 튼튼해지기 위해 어떤 약속을 할 수 있을까? 녹음 버튼을 누르고 씩씩하게 말해봐요!", 0.9); }, []);
+      const startRec = async () => { try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); mediaRecorder.current = new MediaRecorder(stream); mediaRecorder.current.ondataavailable = e => { if (e.data.size > 0) chunks.current.push(e.data); }; mediaRecorder.current.onstop = () => { const blob = new Blob(chunks.current, { type: "audio/webm" }); const currentUrl = URL.createObjectURL(blob); setUrl(currentUrl); chunks.current = []; const r = new FileReader(); r.readAsDataURL(blob); r.onloadend = () => { const fn = `마음튼튼_다짐_${name || "어린이"}.webm`; if (isGAS) { google.script.run.uploadAudio(r.result, fn); } else { callGAS("uploadAudio", { dataUrl: r.result, filename: fn }); } }; }; mediaRecorder.current.start(); setState("recording"); speak("녹음 중입니다. 5초 뒤에 자동으로 끝나요."); setTimeout(() => { if (mediaRecorder.current && mediaRecorder.current.state === "recording") stopRec(); }, 5000); } catch (e) { alert("마이크 권한이 필요합니다!"); } };
+      const stopRec = () => { if (mediaRecorder.current && mediaRecorder.current.state === "recording") { mediaRecorder.current.stop(); setState("done"); speak("멋진 다짐이야! 정말 잘했어!"); confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } }); } };
+      return (<div className="flex flex-col items-center justify-center h-full gap-4 lg:gap-8 p-6 lg:p-8 anim-zoom max-w-4xl mx-auto w-full min-h-0"><div className="text-center shrink-0"><h2 className="text-4xl lg:text-5xl font-black text-indigo-700 font-jua mb-2 lg:mb-4">🎤 나의 다짐 기록하기</h2><p className="text-2xl lg:text-3xl font-bold text-slate-500 leading-snug break-keep">"나는 마음이 튼튼해지기 위해 <span className="text-indigo-500 border-b-4 border-indigo-400">               </span> 을/를 할 것이다!"</p></div><div className="relative w-64 h-64 lg:w-[24rem] lg:h-[24rem] bg-white rounded-[3rem] lg:rounded-[4rem] shadow-2xl border-[12px] border-indigo-100 flex items-center justify-center my-3 lg:my-6 shrink-0"><div className={`text-[8rem] lg:text-[10rem] ${state === "recording" ? "anim-pulse text-red-500" : "text-indigo-300"}`}>🎤</div>{state === "recording" && <div className="absolute inset-0 border-[16px] border-red-400 rounded-[3rem] lg:rounded-[4rem] anim-pulse"></div>}{state === "done" && <div className="absolute -bottom-4 lg:-bottom-6 left-1/2 -translate-x-1/2 text-2xl lg:text-4xl font-black text-white anim-bounce font-jua whitespace-nowrap bg-indigo-500 px-6 py-2 lg:px-8 lg:py-3 rounded-[2rem] shadow-lg">저장 완료! ✨</div>}</div>{state === "idle" && <button onClick={startRec} className="w-full py-6 lg:py-8 bg-indigo-500 text-white rounded-[2rem] lg:rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#3730a3] lg:shadow-[0_10px_0_#3730a3] active:translate-y-2 active:shadow-none font-jua mt-2 shrink-0">🎙️ 녹음 시작 (5초)</button>}{state === "recording" && <button onClick={stopRec} className="w-full py-6 lg:py-8 bg-red-500 text-white rounded-[2rem] lg:rounded-[2.5rem] text-3xl lg:text-5xl font-black shadow-[0_8px_0_#991b1b] lg:shadow-[0_10px_0_#991b1b] anim-pulse font-jua mt-2 shrink-0">⏹️ 녹음 끝내기</button>}{state === "done" && <div className="w-full flex flex-col gap-3 lg:gap-4 mt-2 shrink-0"><audio src={url} controls className="w-full h-12 lg:h-16 rounded-full border-4 border-indigo-100 bg-indigo-50 shadow-inner shrink-0" /><button onClick={() => onDone({ record: "다짐 녹음 성공 🎤" })} className="w-full py-6 lg:py-8 bg-green-500 text-white text-3xl lg:text-4xl font-black rounded-[2rem] lg:rounded-[2.5rem] shadow-[0_8px_0_#166534] active:translate-y-2 active:shadow-none font-jua shrink-0">완료 ✅</button></div>}</div>);
+    }; const Outro = ({ hearts, mission, onNext }) => { useEffect(() => { speak(mission.feedFwd); confetti({ particleCount: 150, spread: 80, origin: { y: 0.7 } }); const t = setTimeout(onNext, 3000); return () => clearTimeout(t); }, []); return (<div className="flex-1 flex items-center justify-center p-8 anim-zoom w-full"><div className="bg-yellow-50 p-12 rounded-[4rem] shadow-2xl border-[12px] border-yellow-300 w-full max-w-4xl flex flex-col items-center gap-8"><div className="text-[10rem] anim-bounce">👏</div><div className="flex gap-4 flex-wrap justify-center bg-white px-8 py-6 rounded-[3rem] border-4 border-yellow-100 shadow-sm w-full">{Array.from({ length: 8 }).map((_, i) => (<IHeart key={i} s={60} fill={i < hearts ? "#ef4444" : "#e2e8f0"} c={i < hearts ? "text-red-400 anim-hb" : "text-slate-300"} />))}</div><h3 className="text-6xl font-black text-slate-800 font-jua">하트 획득! 💖</h3><div className="bg-white p-8 rounded-[3rem] border-[6px] border-yellow-200 w-full text-center relative shadow-md"><button onClick={() => speak(mission.feedFwd)} className="absolute top-6 right-6 p-4 bg-yellow-100 rounded-full text-yellow-600 hover:bg-yellow-200 active:scale-95"><IVol s={40} /></button><p className="text-4xl font-bold text-slate-700 pr-16 break-keep leading-relaxed">{mission.feedFwd}</p></div><button onClick={onNext} className="w-full py-10 bg-yellow-400 text-white rounded-[2.5rem] text-4xl lg:text-5xl font-black shadow-[0_10px_0_#ca8a04] active:translate-y-2 active:shadow-none font-jua mt-4 anim-pulse">다음으로 계속 ▶</button></div></div>); };
+    const App = () => {
+      const [screen, setScreen] = useState("loading");
+      const [actState, setActState] = useState("idle");
+      const [mId, setMId] = useState(1);
+      const [hearts, setHearts] = useState(0);
+      const [name, setName] = useState("");
+      const [records, setRecords] = useState({});
+      const [ttsOn, setTtsOn] = useState(true);
+      const DEF_NAMES = ["홍길동", "김민수", "이영희", "박지민", "최우주", "정하늘"];
+      const [names, setNames] = useState(DEF_NAMES);
+      const [quizSets, setQuizSets] = useState(null);
+      const mission = MISSIONS.find(m => m.id === mId);
+      useEffect(() => {
+        if (isGAS) {
+          google.script.run.withSuccessHandler(r => setNames((r && r.length > 0) ? r : DEF_NAMES)).withFailureHandler(() => setNames(DEF_NAMES)).getNames();
+          google.script.run.withSuccessHandler(r => setQuizSets(r || null)).withFailureHandler(() => setQuizSets(null)).getQuizData();
+        } else {
+          callGAS("getNames").then(r => setNames((r && r.length > 0) ? r : DEF_NAMES));
+          callGAS("getQuizData").then(r => setQuizSets(r || null));
+        }
+        setTimeout(() => setScreen("name"), isGAS ? 1200 : 1200);
+      }, []);
+      useEffect(() => { stopSpeak(); }, [mId, actState]);
+      const handleSelect = id => { setMId(id); setActState("intro_act"); speak(MISSIONS.find(m => m.id === id)?.feedUp || ""); };
+      const complete = res => { const nH = Math.max(hearts, mId); setHearts(nH); const nr = { ...records, [mission.title]: res?.record || "완료" }; setRecords(nr); setActState("outro"); if (mId === 8) { const rs = Object.entries(nr).map(([k, v]) => `[${k}] ${v}`).join(" | "); const pd = { 날짜: new Date().toLocaleString("ko-KR"), 이름: name || "이름없음", 획득하트: nH, 상세기록: rs, 학습완료: "수료 완료 🎓" }; if (isGAS) google.script.run.saveRecord(pd); else callGAS("saveRecord", { data: pd }); } };
+      const goNext = () => { stopSpeak(); if (mId < 8) { const nextId = mId + 1; setMId(nextId); setActState("intro_act"); speak(MISSIONS.find(m => m.id === nextId)?.feedUp || ""); } else setScreen("certificate"); };
+      const toggleTTS = () => { const n = !ttsOn; window.__TTS__ = n; setTtsOn(n); if (n) speak("소리를 켰어요!"); };
+      const handleNameSelect = (n, soundOn) => { setName(n); window.__TTS__ = soundOn; setTtsOn(soundOn); setScreen("dashboard"); if (soundOn) speak(n + " 친구, 새싹 학교에 온 걸 환영해!"); };
+
+      useEffect(() => {
+        if (screen === "certificate") {
+          speak("훌륭해! 마음 튼튼 새싹 학교를 멋지게 졸업했어! 대단해요!");
+          const end = Date.now() + 5000;
+          (function f() { confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#4ade80', '#fbbf24', '#f472b6'] }); confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#4ade80', '#fbbf24', '#f472b6'] }); if (Date.now() < end) requestAnimationFrame(f); }());
+        }
+      }, [screen]);
+
+      useEffect(() => {
+        if (screen === "dashboard" && actState === "idle") {
+          if (mId === 1) speak("왼쪽에서 미션을 고르거나 잠시 기다리면 자동으로 시작할게!");
+          const t = setTimeout(() => {
+            setActState("intro_act");
+            speak(MISSIONS.find(m => m.id === mId)?.feedUp || "");
+          }, 3000);
+          return () => clearTimeout(t);
+        }
+      }, [screen, actState, mId]);
+
+      if (screen === "loading") return <Loading />;
+      if (screen === "name") return <NameSelect names={names} onSelect={handleNameSelect} />;
+      if (screen === "certificate") {
+
+        const downloadReport = () => {
+          const canvas = document.createElement('canvas'); const W = 1200; const H = 1400;
+          canvas.width = W; canvas.height = H; const ctx = canvas.getContext('2d');
+          ctx.fillStyle = "#e0e7ff"; ctx.fillRect(0, 0, W, H);
+          ctx.fillStyle = "#ffffff"; if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(50, 50, 1100, 1300, 40); ctx.fill(); } else { ctx.fillRect(50, 50, 1100, 1300); }
+          ctx.lineWidth = 16; ctx.strokeStyle = "#fbbf24"; if (ctx.roundRect) ctx.stroke();
+          ctx.textAlign = "center"; ctx.fillStyle = "#312e81"; ctx.font = "bold 90px 'Jua', sans-serif"; ctx.fillText("수 료 증", W / 2, 180);
+          ctx.fillStyle = "#1e293b"; ctx.font = "bold 60px 'Jua', sans-serif"; ctx.fillText(`${name || "어린이"} 어린이`, W / 2, 300);
+          ctx.fillStyle = "#f59e0b"; ctx.font = "bold 50px 'Jua', sans-serif"; ctx.fillText("🏅 마음 튼튼 새싹상", W / 2, 400);
+          ctx.fillStyle = "#334155"; ctx.font = "bold 40px 'Jua', sans-serif";
+          ctx.fillText("위 어린이는 스스로의 감정을 잘 이해하고,", W / 2, 510);
+          ctx.fillText("친구를 따뜻하게 배려하는 훈련을 훌륭하게 완수하였기에", W / 2, 570);
+          ctx.fillText("이 상장을 드립니다. 🌟", W / 2, 630);
+          ctx.fillStyle = "#f8fafc"; if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(100, 700, 1000, 480, 30); ctx.fill(); } else { ctx.fillRect(100, 700, 1000, 480); }
+          ctx.fillStyle = "#4338ca"; ctx.font = "bold 45px 'Jua', sans-serif"; ctx.fillText("🌱 나의 배움 기록", W / 2, 770);
+          ctx.textAlign = "left"; ctx.font = "bold 32px 'Jua', sans-serif";
+          let y = 840;
+          Object.entries(records).forEach(entry => {
+            const k = entry[0]; const v = entry[1];
+            ctx.fillStyle = "#6366f1"; ctx.fillText(`[${k}]`, 150, y);
+            ctx.fillStyle = "#334155"; ctx.fillText((v || "").substring(0, 40), 450, y);
+            y += 50;
+          });
+          ctx.textAlign = "center"; ctx.fillStyle = "#94a3b8"; ctx.font = "bold 35px 'Jua', sans-serif"; ctx.fillText(`${new Date().toLocaleDateString("ko-KR")} 마음 튼튼 새싹 학교`, W / 2, 1280);
+          const link = document.createElement('a'); link.download = `마음튼튼상장_${name || "어린이"}.png`; link.href = canvas.toDataURL("image/png"); link.click();
+        };
+
+        return (
+          <div className="w-full h-full bg-gradient-to-b from-indigo-200 to-purple-300 flex p-6 lg:p-10 overflow-hidden items-center justify-center">
+            <div className="bg-white p-8 lg:p-12 rounded-[3.5rem] shadow-2xl border-[16px] border-yellow-400 w-full max-w-6xl flex flex-col items-center anim-zoom relative max-h-full overflow-hidden">
+              <div className="absolute -top-6 -left-6 text-6xl anim-spin">⭐</div>
+              <div className="absolute -top-6 -right-6 text-6xl anim-spin">⭐</div>
+              <div className="absolute -bottom-6 -left-6 text-6xl anim-bounce">🎈</div>
+              <div className="absolute -bottom-6 -right-6 text-6xl anim-bounce">🎈</div>
+              <div className="text-[7rem] anim-float leading-none -mt-4 shrink-0">🎓</div>
+              <h2 className="text-5xl font-black text-indigo-900 font-jua border-b-[8px] border-yellow-400 pb-3 px-12 shrink-0">수 료 증</h2>
+              <div className="text-center mt-5 shrink-0 flex items-center justify-center gap-3">
+                <span className="text-4xl lg:text-5xl font-black text-slate-800 font-jua border-b-[6px] border-green-400 pb-2 px-8">{name || "어린이"}</span>
+                <span className="text-3xl font-bold text-slate-600">어린이</span>
+              </div>
+              <p className="text-4xl font-black text-amber-500 font-jua mt-4 shrink-0 bg-amber-50 px-8 py-3 rounded-full border-4 border-amber-200 outline outline-4 outline-amber-50">🏅 마음 튼튼 새싹상</p>
+
+              <div className="bg-slate-50 px-8 py-6 rounded-[2.5rem] border-[8px] border-indigo-100 text-center w-full mt-6 shadow-sm shrink-0 flex flex-col items-center gap-4">
+                <div className="text-2xl lg:text-3xl font-black text-slate-800 break-keep leading-loose font-jua">위 어린이는 스스로 마음을 공부하고 훈련하여<br /><div className="flex justify-center gap-2 my-4">{Array.from({ length: 8 }).map((_, i) => (<IHeart key={i} s={40} fill="#ef4444" c="text-red-400" />))}</div> <span className="text-green-600 text-4xl">8개의 사랑의 하트</span>를 모두 모았기에<br />이 상장을 아낌없이 칭찬하며 드립니다. 🌟</div>
+              </div>
+
+              <div className="w-full bg-indigo-50 rounded-[2.5rem] p-6 border-8 border-indigo-100 mt-6 overflow-y-auto mb-4 min-h-0 flex-1 shadow-inner scrollbar-hide">
+                <h3 className="text-3xl font-black text-indigo-800 text-center mb-5 font-jua">🌱 나의 마음 공부 기록</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(records).length > 0 ? Object.entries(records).map((entry, i) => {
+                    const missionName = entry[0]; const recordText = entry[1];
+                    return (
+                      <div key={i} className="flex flex-col bg-white p-5 rounded-3xl shadow-sm border-[4px] border-indigo-50 min-w-0">
+                        <span className="text-indigo-600 font-black text-xl mb-2 truncate font-jua">{missionName}</span>
+                        <span className="text-slate-700 font-bold text-xl truncate">{recordText}</span>
+                      </div>
+                    );
+                  }) : (
+                    <div className="col-span-2 text-center text-slate-400 font-bold py-6 text-2xl">배움 기록이 없습니다.</div>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-xl font-bold text-slate-400 shrink-0 mb-2">{new Date().toLocaleDateString("ko-KR")} 마음 튼튼 새싹 학교 🏫</p>
+              <div className="flex gap-6 w-full mt-2 shrink-0">
+                <button onClick={() => { setScreen("name"); setActState("idle"); setMId(1); setHearts(0); setRecords({}); }} className="flex-[0.4] py-8 bg-slate-200 text-slate-700 rounded-[2.5rem] text-3xl font-black active:scale-95 shadow-md border-b-[8px] border-slate-300 active:border-b-0 active:translate-y-2 font-jua">처음으로 🏠</button>
+                <button onClick={downloadReport} className="flex-1 py-8 bg-indigo-500 text-white rounded-[2.5rem] text-4xl lg:text-5xl font-black active:scale-95 shadow-[0_12px_0_#3730a3] border-indigo-600 active:border-b-0 active:translate-y-3 font-jua anim-bounce text-center">🏆 수료증 다운받기 📸</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="w-full h-full flex bg-slate-50">
+          <Sidebar hearts={hearts} mId={mId} records={records} ttsOn={ttsOn} toggleTTS={toggleTTS} onSelect={handleSelect} />
+          <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+            <div className="flex justify-end items-center p-5 shrink-0 gap-4 bg-white border-b-4 border-slate-100 shadow-sm z-20">
+              <span className="text-2xl font-black text-slate-600 font-jua bg-slate-100 rounded-[1.5rem] px-6 py-3 border-[3px] border-slate-200 shadow-inner">{name || "홍길동"} 친구</span>
+              <div className="flex items-center gap-2 bg-red-50 border-[3px] border-red-200 px-6 py-3 rounded-[1.5rem] shadow-inner"><IHeart s={28} fill="#ef4444" c="anim-hb text-red-500" /><span className="text-3xl font-black text-red-500 font-jua mt-1">{hearts} 하트</span></div>
+            </div>
+            <div className="flex-1 min-h-0 relative flex flex-col">
+              {actState === "idle" && (<div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 gap-4 lg:gap-6 anim-fade min-h-0"><div className="text-[7rem] lg:text-[9rem] anim-float shrink-0">🗺️</div><div className="text-center shrink-0"><h2 className="text-4xl lg:text-5xl font-black text-slate-700 font-jua mb-2 lg:mb-4">왼쪽에서 미션을 골라봐!</h2><p className="text-slate-400 font-bold text-xl lg:text-2xl">8개의 미션을 모두 완료하면 수료증을 받을 수 있어!</p></div><div className="flex gap-3 lg:gap-4 flex-wrap justify-center mt-2 lg:mt-4 shrink-0 overflow-y-auto min-h-0">{[1, 2, 3, 4].map(n => (<div key={n} className={`bg-gradient-to-r ${CS[CC[n - 1]].hdr} text-white px-5 py-3 lg:px-6 lg:py-4 rounded-[1.5rem] lg:rounded-[2rem] text-xl lg:text-2xl font-black font-jua shadow-md`}>{MISSIONS.filter(m => m.chap === n)[0].chapName}</div>))}</div><p className="text-xl lg:text-2xl font-bold text-blue-500 bg-blue-50 px-6 py-3 rounded-full anim-pulse mt-2 lg:mt-4 shrink-0">⏳ 잠시 후 자동으로 시작됩니다...</p></div>)}
+              {actState === "intro_act" && mission && (<div className="flex-1 flex items-center justify-center p-6 lg:p-8 anim-zoom min-h-0"><div className="bg-white p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] shadow-2xl border-[8px] border-emerald-300 w-full max-w-2xl flex flex-col items-center gap-4 lg:gap-6 max-h-full overflow-y-auto"><span className="text-emerald-500 font-black text-2xl lg:text-3xl font-jua shrink-0">{mission.chapName}</span><div className="text-[6rem] lg:text-[7.5rem] anim-float leading-none shrink-0">{mission.icon}</div><h2 className="text-4xl lg:text-5xl font-black text-slate-800 font-jua text-center shrink-0">{mission.title}</h2><div className="bg-emerald-50 p-6 lg:p-8 rounded-[2rem] border-4 border-emerald-100 w-full text-center relative shrink-0"><button onClick={() => speak(mission.feedUp)} className="absolute top-4 right-4 p-3 bg-emerald-200 rounded-full text-emerald-700"><IVol s={28} /></button><p className="text-2xl lg:text-3xl font-bold text-emerald-900 pr-10 break-keep leading-relaxed">{mission.feedUp}</p></div><button onClick={() => { setActState("play"); speak(mission.feedUp); }} className="w-full py-6 lg:py-8 bg-emerald-500 text-white rounded-[2rem] text-3xl lg:text-4xl font-black shadow-[0_8px_0_#047857] active:translate-y-2 active:shadow-none font-jua mt-2 shrink-0">시작하기 ▶</button></div></div>)}
+              {actState === "play" && mission && (<div className="flex-1 flex flex-col overflow-hidden"><div className="px-6 py-4 flex items-center gap-4 border-b-4 border-slate-100 bg-white shrink-0"><button onClick={() => setActState("idle")} className="p-3 text-slate-400 hover:bg-slate-100 rounded-full active:scale-95"><IBack s={32} /></button><span className="text-3xl font-black text-slate-600 font-jua">{mission.chapName} · {mission.title}</span></div><div className="flex-1 overflow-hidden relative max-w-5xl mx-auto w-full">{mission.type === "weather" && <AWeather onDone={complete} />}{mission.type === "quiz" && <AQuiz setKey={mission.set} onDone={complete} quizSets={quizSets} />}{mission.type === "breath" && <ABreath onDone={complete} />}{mission.type === "scrub" && <AScrub onDone={complete} />}{mission.type === "bandage" && <ABandage onDone={complete} />}{mission.type === "record" && <AMissionRecord onDone={complete} name={name} />}{mission.type === "finish" && (<div className="flex flex-col items-center justify-center h-full anim-zoom gap-8 p-8"><div className="text-[12rem] anim-float">🎓</div><p className="text-5xl font-black text-slate-800 font-jua text-center break-keep leading-loose">{mission.feedUp}</p><button onClick={() => complete({ record: "과정 수료 완료 🎓" })} className="w-full max-w-lg py-10 bg-yellow-400 text-white rounded-[3rem] text-5xl font-black shadow-[0_12px_0_#ca8a04] active:translate-y-2 active:shadow-none font-jua mt-6 anim-bounce">수료하기 🎓</button></div>)}</div></div>)}
+              {actState === "outro" && mission && <Outro hearts={hearts} mission={mission} onNext={goNext} />}
+            </div>
+          </div>
+        </div>
+      );
+    };
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+
+</html>
