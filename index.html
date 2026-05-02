@@ -276,19 +276,24 @@
 
     // ===== 음성 녹음 + STT 컴포넌트 (재사용) =====
     const useVoiceRecorder = (name, fileLabel) => {
-      const [state, setState] = useState("idle"); // idle, recording, done
+      const [state, setState] = useState("idle"); // idle, recording, done, uploading
       const [audioUrl, setAudioUrl] = useState("");
       const [transcript, setTranscript] = useState("");
       const [interimText, setInterimText] = useState("");
+      const [driveUrl, setDriveUrl] = useState(""); // 구글드라이브 URL
+      const [uploadStatus, setUploadStatus] = useState(""); // 업로드 상태
       const mediaRecorder = useRef(null);
       const chunks = useRef([]);
       const recognition = useRef(null);
       const finalTranscriptRef = useRef("");
+      const blobRef = useRef(null);
 
       const startRec = async () => {
         finalTranscriptRef.current = "";
         setTranscript("");
         setInterimText("");
+        setDriveUrl("");
+        setUploadStatus("");
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorder.current = new MediaRecorder(stream);
@@ -297,22 +302,12 @@
           mediaRecorder.current.onstop = () => {
             stream.getTracks().forEach(t => t.stop());
             const blob = new Blob(chunks.current, { type: "audio/webm" });
+            blobRef.current = blob;
             const currentUrl = URL.createObjectURL(blob);
             setAudioUrl(currentUrl);
-            const r = new FileReader();
-            r.readAsDataURL(blob);
-            r.onloadend = () => {
-              const fn = `마음튼튼_${fileLabel}_${name || "어린이"}_${Date.now()}.webm`;
-              if (isGAS) {
-                google.script.run.uploadAudio(r.result, fn);
-              } else {
-                callGAS("uploadAudio", { dataUrl: r.result, filename: fn });
-              }
-            };
           };
           mediaRecorder.current.start();
           
-          // STT 시작
           if (SpeechRecognition) {
             try {
               recognition.current = new SpeechRecognition();
@@ -354,15 +349,56 @@
         setState("done");
       };
 
+      // 드라이브에 업로드 후 URL 반환 (Promise)
+      const uploadToDrive = () => {
+        return new Promise((resolve) => {
+          if (!blobRef.current) { resolve(""); return; }
+          setUploadStatus("uploading");
+          const r = new FileReader();
+          r.readAsDataURL(blobRef.current);
+          r.onloadend = async () => {
+            const fn = `마음튼튼_${fileLabel}_${name || "어린이"}_${Date.now()}.webm`;
+            try {
+              if (isGAS) {
+                google.script.run
+                  .withSuccessHandler(url => {
+                    setDriveUrl(url || "");
+                    setUploadStatus(url ? "done" : "fail");
+                    resolve(url || "");
+                  })
+                  .withFailureHandler(err => {
+                    console.error("업로드 실패:", err);
+                    setUploadStatus("fail");
+                    resolve("");
+                  })
+                  .uploadAudio(r.result, fn);
+              } else {
+                const url = await callGAS("uploadAudio", { dataUrl: r.result, filename: fn });
+                setDriveUrl(url || "");
+                setUploadStatus(url ? "done" : "fail");
+                resolve(url || "");
+              }
+            } catch (e) {
+              console.error("업로드 오류:", e);
+              setUploadStatus("fail");
+              resolve("");
+            }
+          };
+        });
+      };
+
       const reset = () => {
         if (audioUrl) URL.revokeObjectURL(audioUrl);
         setState("idle");
         setAudioUrl("");
         setTranscript("");
+        setDriveUrl("");
+        setUploadStatus("");
         finalTranscriptRef.current = "";
+        blobRef.current = null;
       };
 
-      return { state, audioUrl, transcript, interimText, startRec, stopRec, reset };
+      return { state, audioUrl, transcript, interimText, driveUrl, uploadStatus, startRec, stopRec, reset, uploadToDrive };
     };
 
     // ===== 입력 모드 토글 (음성/키보드 공통) =====
@@ -454,9 +490,16 @@
               {rec.state === "done" && (
                 <div className="w-full max-w-2xl flex flex-col gap-2 mt-1 shrink-0">
                   {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 sm:h-10 rounded-full border-[3px] border-emerald-100 bg-emerald-50 shadow-inner" />}
+                  {rec.uploadStatus === "uploading" && <p className="text-xs sm:text-sm text-emerald-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                  {rec.uploadStatus === "done" && <p className="text-xs sm:text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
+                  {rec.uploadStatus === "fail" && <p className="text-xs sm:text-sm text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
                   <div className="flex gap-2 w-full">
-                    <button onClick={rec.reset} className="flex-[0.4] py-2 sm:py-3 lg:py-4 bg-orange-400 text-white rounded-2xl text-base sm:text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua">↺ 다시</button>
-                    <button onClick={() => { sfxStar(); onDone({ record: "오늘 감정 녹음 완료 🎙️", transcript: rec.transcript || "(음성 인식 안 됨)" }); }} className="flex-1 py-2 sm:py-3 lg:py-4 bg-green-500 text-white text-lg sm:text-xl lg:text-2xl font-black rounded-2xl shadow-[0_4px_0_#166534] active:translate-y-1 active:shadow-none font-jua">제출 ✅</button>
+                    <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 sm:py-3 lg:py-4 bg-orange-400 text-white rounded-2xl text-base sm:text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
+                    <button onClick={async () => {
+                      const url = await rec.uploadToDrive();
+                      sfxStar();
+                      onDone({ record: "오늘 감정 녹음 완료 🎙️", transcript: rec.transcript || "(음성 인식 안 됨)", driveUrl: url });
+                    }} disabled={rec.uploadStatus === "uploading"} className="flex-1 py-2 sm:py-3 lg:py-4 bg-green-500 text-white text-lg sm:text-xl lg:text-2xl font-black rounded-2xl shadow-[0_4px_0_#166534] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">{rec.uploadStatus === "uploading" ? "저장 중..." : "제출 ✅"}</button>
                   </div>
                 </div>
               )}
@@ -547,9 +590,16 @@
               {rec.state === "done" && (
                 <div className="w-full max-w-2xl flex flex-col gap-2 mt-1 shrink-0">
                   {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 sm:h-10 rounded-full border-[3px] border-blue-100 bg-blue-50 shadow-inner" />}
+                  {rec.uploadStatus === "uploading" && <p className="text-xs sm:text-sm text-blue-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                  {rec.uploadStatus === "done" && <p className="text-xs sm:text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
+                  {rec.uploadStatus === "fail" && <p className="text-xs sm:text-sm text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
                   <div className="flex gap-2 w-full">
-                    <button onClick={rec.reset} className="flex-[0.4] py-2 sm:py-3 lg:py-4 bg-orange-400 text-white rounded-2xl text-base sm:text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua">↺ 다시</button>
-                    <button onClick={() => { sfxStar(); onDone({ record: "친구에게 설명 완료 🗣️", transcript: rec.transcript || "(음성 인식 안 됨)" }); }} className="flex-1 py-2 sm:py-3 lg:py-4 bg-green-500 text-white text-lg sm:text-xl lg:text-2xl font-black rounded-2xl shadow-[0_4px_0_#166534] active:translate-y-1 active:shadow-none font-jua">제출 ✅</button>
+                    <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 sm:py-3 lg:py-4 bg-orange-400 text-white rounded-2xl text-base sm:text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
+                    <button onClick={async () => {
+                      const url = await rec.uploadToDrive();
+                      sfxStar();
+                      onDone({ record: "친구에게 설명 완료 🗣️", transcript: rec.transcript || "(음성 인식 안 됨)", driveUrl: url });
+                    }} disabled={rec.uploadStatus === "uploading"} className="flex-1 py-2 sm:py-3 lg:py-4 bg-green-500 text-white text-lg sm:text-xl lg:text-2xl font-black rounded-2xl shadow-[0_4px_0_#166534] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">{rec.uploadStatus === "uploading" ? "저장 중..." : "제출 ✅"}</button>
                   </div>
                 </div>
               )}
@@ -853,7 +903,8 @@
       const [textInput, setTextInput] = useState("");
       const [showRating, setShowRating] = useState(false);
       const [retryCount, setRetryCount] = useState(0);
-      const [submittedText, setSubmittedText] = useState(""); // 별점 평가에서 사용할 최종 텍스트
+      const [submittedText, setSubmittedText] = useState("");
+      const [submittedDriveUrl, setSubmittedDriveUrl] = useState("");
       
       useEffect(() => { speak("오늘 배운 것 중 실천할 것을 하나 표현해볼까요? 음성으로 말하거나 글자로 써도 좋아요!", 0.95); }, []);
       
@@ -862,22 +913,23 @@
         setTextInput("");
         setShowRating(false);
         setSubmittedText("");
+        setSubmittedDriveUrl("");
         setRetryCount(c => c + 1);
         speak("다시 도전해봐요! 더 멋진 다짐을 만들어보자!");
       };
       
-      const goToRating = (text, recordType) => {
-        setSubmittedText(text);
+      const handleVoiceSubmit = async () => {
+        const url = await rec.uploadToDrive();
+        setSubmittedDriveUrl(url);
+        setSubmittedText(rec.transcript || "(음성 인식 안 됨)");
         setShowRating(true);
-      };
-      
-      const handleVoiceSubmit = () => {
-        goToRating(rec.transcript || "(음성 인식 안 됨)", "voice");
       };
       
       const handleTextSubmit = () => {
         if (!textInput.trim()) { alert("내용을 입력해주세요!"); return; }
-        goToRating(textInput.trim(), "text");
+        setSubmittedText(textInput.trim());
+        setSubmittedDriveUrl("");
+        setShowRating(true);
       };
       
       const onRatingSubmit = (rating) => {
@@ -885,13 +937,14 @@
         onDone({ 
           record: `다짐 작성 완료 ${recordType} (별점: ${'⭐'.repeat(rating)}, 재도전: ${retryCount}회)`, 
           transcript: submittedText,
-          rating: rating
+          rating: rating,
+          driveUrl: submittedDriveUrl
         });
       };
       
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-6 anim-zoom max-w-4xl mx-auto w-full min-h-0 overflow-y-auto">
-          <div className="text-center shrink-0 w-full">
+        <div className="flex flex-col items-center justify-start h-full gap-2 sm:gap-3 lg:gap-4 p-3 sm:p-4 lg:p-6 anim-zoom max-w-4xl mx-auto w-full min-h-0 overflow-y-auto">
+          <div className="text-center shrink-0 w-full mt-2">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-indigo-700 font-jua mb-1">🎤 나의 다짐 기록하기</h2>
             <p className="text-sm sm:text-base lg:text-xl font-bold text-slate-600 leading-snug break-keep">오늘 배운 것 중 <span className="text-indigo-500">실천할 것</span>을 표현해봐요!</p>
             {retryCount > 0 && <p className="text-xs sm:text-sm font-bold text-orange-500 mt-1">🔄 {retryCount}번째 도전!</p>}
@@ -899,8 +952,13 @@
           
           {!showRating && (
             <>
-              <div className="w-full max-w-2xl shrink-0">
-                <InputModeToggle mode={mode} onChange={setMode} color="indigo" />
+              <div className="w-full max-w-2xl shrink-0 flex gap-1 sm:gap-2 bg-slate-100 p-1 rounded-2xl shadow-inner">
+                <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-xl text-sm sm:text-base lg:text-lg font-black font-jua transition-all ${mode === "voice" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
+                  🎙️ 음성으로
+                </button>
+                <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 sm:py-3 px-3 sm:px-4 rounded-xl text-sm sm:text-base lg:text-lg font-black font-jua transition-all ${mode === "text" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
+                  ⌨️ 글자로
+                </button>
               </div>
               
               <div className="bg-indigo-50 border-[3px] border-indigo-200 rounded-[1.2rem] sm:rounded-[1.5rem] p-2 sm:p-3 text-xs sm:text-sm lg:text-base font-bold text-indigo-800 text-left w-full shadow-inner max-w-2xl mx-auto shrink-0">
@@ -916,7 +974,6 @@
                   <div className="relative w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white rounded-full shadow-2xl border-[5px] sm:border-[6px] lg:border-[8px] border-indigo-100 flex items-center justify-center my-1 shrink-0 anim-zoom">
                     <div className={`text-[2.5rem] sm:text-[3rem] lg:text-[4.5rem] ${rec.state === "recording" ? "anim-pulse text-red-500" : "text-indigo-300"}`}>🎤</div>
                     {rec.state === "recording" && <div className="absolute inset-0 border-[5px] sm:border-[6px] lg:border-[8px] border-red-400 rounded-full anim-pulse"></div>}
-                    {rec.state === "done" && <div className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 text-xs sm:text-sm font-black text-white anim-bounce font-jua whitespace-nowrap bg-indigo-500 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg">저장 완료! ✨</div>}
                   </div>
                   
                   {rec.state === "recording" && (rec.transcript || rec.interimText) && (
@@ -945,9 +1002,11 @@
                   {rec.state === "done" && (
                     <div className="w-full max-w-2xl flex flex-col gap-2 mt-1 shrink-0">
                       {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 sm:h-10 rounded-full border-[3px] border-indigo-100 bg-indigo-50 shadow-inner shrink-0" />}
+                      {rec.uploadStatus === "uploading" && <p className="text-xs sm:text-sm text-indigo-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                      {rec.uploadStatus === "done" && <p className="text-xs sm:text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
                       <div className="flex gap-2 w-full mt-1 shrink-0">
-                        <button onClick={rec.reset} className="flex-[0.4] py-2 sm:py-3 bg-orange-400 text-white rounded-2xl text-sm sm:text-lg font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua shrink-0">↺ 다시</button>
-                        <button onClick={handleVoiceSubmit} className="flex-1 py-2 sm:py-3 bg-amber-500 text-white text-sm sm:text-lg lg:text-xl font-black rounded-2xl shadow-[0_4px_0_#b45309] active:translate-y-1 active:shadow-none font-jua shrink-0">⭐ 스티커 평가하기</button>
+                        <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 sm:py-3 bg-orange-400 text-white rounded-2xl text-sm sm:text-lg font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
+                        <button onClick={handleVoiceSubmit} disabled={rec.uploadStatus === "uploading"} className="flex-1 py-2 sm:py-3 bg-amber-500 text-white text-sm sm:text-lg lg:text-xl font-black rounded-2xl shadow-[0_4px_0_#b45309] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">{rec.uploadStatus === "uploading" ? "저장 중..." : "⭐ 스티커 평가"}</button>
                       </div>
                     </div>
                   )}
@@ -1075,7 +1134,8 @@
           학습완료: mId === TOTAL ? "수료 완료 🎓" : `진행중 (미션 ${mId}/${TOTAL})`,
           미션종류: mission.title,
           음성텍스트: res?.transcript || "",
-          별점: res?.rating || ""
+          별점: res?.rating || "",
+          음성파일URL: res?.driveUrl || ""
         };
         if (isGAS) {
           google.script.run.saveRecord(pd);
