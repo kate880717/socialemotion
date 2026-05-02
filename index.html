@@ -421,7 +421,7 @@
       );
     };
 
-    // ===== 시작 감정 (음성+키보드) - 글씨 큼, 여백만 줄임 =====
+    // ===== 시작 감정 (음성+키보드) - 글씨 크게 =====
     const AStartVoice = ({ onDone, name }) => {
       const rec = useVoiceRecorder(name, "오늘감정");
       const [mode, setMode] = useState("voice");
@@ -437,26 +437,23 @@
       
       return (
         <div className="flex flex-col items-center h-full gap-2 lg:gap-2 p-3 lg:p-4 anim-zoom max-w-3xl mx-auto w-full min-h-0">
-          {/* 헤더 - 글씨는 크게, 여백만 줄임 */}
           <div className="text-center shrink-0">
             <h2 className="text-2xl lg:text-3xl font-black text-emerald-700 font-jua">🎙️ 오늘의 감정 표현하기</h2>
-            <p className="text-base lg:text-lg font-bold text-slate-600 leading-snug break-keep">오늘 내 기분이 어떤지 솔직하게 표현해봐요!</p>
+            <p className="text-lg lg:text-xl font-bold text-slate-600 leading-snug break-keep">오늘 내 기분이 어떤지 솔직하게 표현해봐요!</p>
           </div>
           
-          {/* 토글 - 글씨 크게 유지 */}
           <div className="w-full max-w-2xl shrink-0 flex gap-1 sm:gap-2 bg-slate-100 p-1 rounded-2xl shadow-inner">
-            <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "voice" ? "bg-emerald-500 text-white shadow-md" : "bg-white text-emerald-600 border-2 border-emerald-200"}`}>
+            <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "voice" ? "bg-emerald-500 text-white shadow-md" : "bg-white text-emerald-600 border-2 border-emerald-200"}`}>
               🎙️ 음성으로
             </button>
-            <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "text" ? "bg-emerald-500 text-white shadow-md" : "bg-white text-emerald-600 border-2 border-emerald-200"}`}>
+            <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "text" ? "bg-emerald-500 text-white shadow-md" : "bg-white text-emerald-600 border-2 border-emerald-200"}`}>
               ⌨️ 글자로
             </button>
           </div>
           
-          {/* 예시 - 글씨 크게, padding만 줄임 */}
-          <div className="bg-emerald-50 border-[3px] border-emerald-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-2.5 text-base lg:text-lg font-bold text-emerald-800 w-full max-w-2xl shadow-inner shrink-0">
-            <p className="text-emerald-600 text-sm lg:text-base font-jua">💡 이렇게 표현해봐요!</p>
-            <ul className="ml-2 break-keep leading-snug">
+          <div className="bg-emerald-50 border-[3px] border-emerald-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-lg lg:text-xl font-bold text-emerald-800 w-full max-w-2xl shadow-inner shrink-0">
+            <p className="text-emerald-600 text-base lg:text-lg font-jua mb-1">💡 이렇게 표현해봐요!</p>
+            <ul className="ml-2 break-keep leading-snug space-y-0.5">
               <li>"오늘은 학교 와서 <span className="text-emerald-600">기분이 좋아요!</span>"</li>
               <li>"아침에 동생이랑 싸워서 <span className="text-emerald-600">속상해요.</span>"</li>
             </ul>
@@ -469,15 +466,15 @@
                 {rec.state === "recording" && <div className="absolute inset-0 border-[6px] lg:border-[8px] border-red-400 rounded-full anim-pulse"></div>}
               </div>
               {rec.state === "recording" && (rec.transcript || rec.interimText) && (
-                <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-20 overflow-y-auto">
-                  <p className="text-sm text-red-500 font-bold">🎙️ 듣는 중...</p>
-                  <p className="text-base font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
+                <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-24 overflow-y-auto">
+                  <p className="text-base lg:text-lg text-red-500 font-bold">🎙️ 듣는 중...</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
                 </div>
               )}
               {rec.state === "done" && rec.transcript && (
-                <div className="bg-emerald-50 border-[3px] border-emerald-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-20 overflow-y-auto">
-                  <p className="text-sm text-emerald-600 font-bold">📝 내가 말한 내용:</p>
-                  <p className="text-base font-bold text-slate-700 break-keep">{rec.transcript}</p>
+                <div className="bg-emerald-50 border-[3px] border-emerald-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-24 overflow-y-auto">
+                  <p className="text-base lg:text-lg text-emerald-600 font-bold">📝 내가 말한 내용:</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-700 break-keep">{rec.transcript}</p>
                 </div>
               )}
               
@@ -495,9 +492,9 @@
               {rec.state === "done" && (
                 <div className="w-full max-w-2xl flex flex-col gap-1.5 shrink-0">
                   {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 rounded-full border-[3px] border-emerald-100 bg-emerald-50 shadow-inner" />}
-                  {rec.uploadStatus === "uploading" && <p className="text-sm text-emerald-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
-                  {rec.uploadStatus === "done" && <p className="text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
-                  {rec.uploadStatus === "fail" && <p className="text-sm text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
+                  {rec.uploadStatus === "uploading" && <p className="text-base lg:text-lg text-emerald-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                  {rec.uploadStatus === "done" && <p className="text-base lg:text-lg text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
+                  {rec.uploadStatus === "fail" && <p className="text-base lg:text-lg text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
                   <div className="flex gap-2 w-full">
                     <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 lg:py-3 bg-orange-400 text-white rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
                     <button onClick={async () => {
@@ -520,7 +517,7 @@
                 className="w-full max-w-2xl flex-1 min-h-[80px] p-3 bg-white border-[3px] border-emerald-200 rounded-2xl text-lg lg:text-xl font-bold text-slate-700 focus:outline-none focus:border-emerald-400 resize-none shadow-inner shrink"
                 maxLength={300}
               />
-              <p className="text-sm text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
+              <p className="text-base text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
               <div className="w-full max-w-2xl flex gap-2 shrink-0">
                 <button onClick={() => onDone({ record: "오늘 감정 건너뛰기", transcript: "" })} className="px-4 py-3 lg:py-4 bg-slate-300 text-slate-700 rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#94a3b8] active:translate-y-1 active:shadow-none font-jua whitespace-nowrap">건너뛰기</button>
                 <button onClick={handleTextSubmit} className="flex-1 py-3 lg:py-4 bg-emerald-500 text-white rounded-2xl text-xl lg:text-2xl font-black shadow-[0_5px_0_#047857] active:translate-y-1 active:shadow-none font-jua">제출 ✅</button>
@@ -531,7 +528,7 @@
       );
     };
 
-    // ===== 친구에게 설명하기 - 글씨 크게, 여백만 줄임 =====
+    // ===== 친구에게 설명하기 - 글씨 크게 =====
     const ATeach = ({ onDone, name }) => {
       const rec = useVoiceRecorder(name, "친구에게설명");
       const [mode, setMode] = useState("voice");
@@ -549,21 +546,21 @@
         <div className="flex flex-col items-center h-full gap-2 lg:gap-2 p-3 lg:p-4 anim-zoom max-w-3xl mx-auto w-full min-h-0">
           <div className="text-center shrink-0">
             <h2 className="text-2xl lg:text-3xl font-black text-blue-700 font-jua">🗣️ 친구에게 설명하기</h2>
-            <p className="text-base lg:text-lg font-bold text-slate-600 leading-snug break-keep">배운 것을 친구에게 가르쳐줘요!</p>
+            <p className="text-lg lg:text-xl font-bold text-slate-600 leading-snug break-keep">배운 것을 친구에게 가르쳐줘요!</p>
           </div>
           
           <div className="w-full max-w-2xl shrink-0 flex gap-1 sm:gap-2 bg-slate-100 p-1 rounded-2xl shadow-inner">
-            <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "voice" ? "bg-blue-500 text-white shadow-md" : "bg-white text-blue-600 border-2 border-blue-200"}`}>
+            <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "voice" ? "bg-blue-500 text-white shadow-md" : "bg-white text-blue-600 border-2 border-blue-200"}`}>
               🎙️ 음성으로
             </button>
-            <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "text" ? "bg-blue-500 text-white shadow-md" : "bg-white text-blue-600 border-2 border-blue-200"}`}>
+            <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "text" ? "bg-blue-500 text-white shadow-md" : "bg-white text-blue-600 border-2 border-blue-200"}`}>
               ⌨️ 글자로
             </button>
           </div>
           
-          <div className="bg-blue-50 border-[3px] border-blue-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-2.5 text-base lg:text-lg font-bold text-blue-800 w-full max-w-2xl shadow-inner shrink-0">
-            <p className="text-blue-600 text-sm lg:text-base font-jua">💡 이런 것을 설명해봐요!</p>
-            <ul className="ml-2 break-keep leading-snug">
+          <div className="bg-blue-50 border-[3px] border-blue-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-lg lg:text-xl font-bold text-blue-800 w-full max-w-2xl shadow-inner shrink-0">
+            <p className="text-blue-600 text-base lg:text-lg font-jua mb-1">💡 이런 것을 설명해봐요!</p>
+            <ul className="ml-2 break-keep leading-snug space-y-0.5">
               <li>화가 날 때는 <span className="text-blue-600">풍선 호흡</span>을 해!</li>
               <li>친구가 다치면 <span className="text-blue-600">걱정해주는 마음</span>을 가져!</li>
               <li>예쁜 말로 말하면 친구도 <span className="text-blue-600">기분 좋아져!</span></li>
@@ -577,15 +574,15 @@
                 {rec.state === "recording" && <div className="absolute inset-0 border-[6px] lg:border-[8px] border-red-400 rounded-full anim-pulse"></div>}
               </div>
               {rec.state === "recording" && (rec.transcript || rec.interimText) && (
-                <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-20 overflow-y-auto">
-                  <p className="text-sm text-red-500 font-bold">🎙️ 듣는 중...</p>
-                  <p className="text-base font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
+                <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-24 overflow-y-auto">
+                  <p className="text-base lg:text-lg text-red-500 font-bold">🎙️ 듣는 중...</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
                 </div>
               )}
               {rec.state === "done" && rec.transcript && (
-                <div className="bg-blue-50 border-[3px] border-blue-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-24 overflow-y-auto">
-                  <p className="text-sm text-blue-600 font-bold">📝 내가 가르친 내용:</p>
-                  <p className="text-base font-bold text-slate-700 break-keep">{rec.transcript}</p>
+                <div className="bg-blue-50 border-[3px] border-blue-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-28 overflow-y-auto">
+                  <p className="text-base lg:text-lg text-blue-600 font-bold">📝 내가 가르친 내용:</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-700 break-keep">{rec.transcript}</p>
                 </div>
               )}
               
@@ -603,9 +600,9 @@
               {rec.state === "done" && (
                 <div className="w-full max-w-2xl flex flex-col gap-1.5 shrink-0">
                   {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 rounded-full border-[3px] border-blue-100 bg-blue-50 shadow-inner" />}
-                  {rec.uploadStatus === "uploading" && <p className="text-sm text-blue-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
-                  {rec.uploadStatus === "done" && <p className="text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
-                  {rec.uploadStatus === "fail" && <p className="text-sm text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
+                  {rec.uploadStatus === "uploading" && <p className="text-base lg:text-lg text-blue-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                  {rec.uploadStatus === "done" && <p className="text-base lg:text-lg text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
+                  {rec.uploadStatus === "fail" && <p className="text-base lg:text-lg text-red-500 font-bold text-center">⚠️ 드라이브 저장 실패</p>}
                   <div className="flex gap-2 w-full">
                     <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 lg:py-3 bg-orange-400 text-white rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
                     <button onClick={async () => {
@@ -628,7 +625,7 @@
                 className="w-full max-w-2xl flex-1 min-h-[80px] p-3 bg-white border-[3px] border-blue-200 rounded-2xl text-lg lg:text-xl font-bold text-slate-700 focus:outline-none focus:border-blue-400 resize-none shadow-inner shrink"
                 maxLength={300}
               />
-              <p className="text-sm text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
+              <p className="text-base text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
               <div className="w-full max-w-2xl flex gap-2 shrink-0">
                 <button onClick={() => onDone({ record: "친구에게 설명 건너뛰기", transcript: "" })} className="px-4 py-3 lg:py-4 bg-slate-300 text-slate-700 rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#94a3b8] active:translate-y-1 active:shadow-none font-jua whitespace-nowrap">건너뛰기</button>
                 <button onClick={handleTextSubmit} className="flex-1 py-3 lg:py-4 bg-blue-500 text-white rounded-2xl text-xl lg:text-2xl font-black shadow-[0_5px_0_#1e40af] active:translate-y-1 active:shadow-none font-jua">제출 ✅</button>
@@ -722,7 +719,7 @@
       );
     };
 
-    // ===== 풍선 호흡 =====
+    // ===== 풍선 호흡 - 콘텐츠 크기 조정 =====
     const ABreath = ({ onDone }) => {
       const [scale, setScale] = useState(1);
       const [done, setDone] = useState(0);
@@ -762,32 +759,34 @@
       const faceWord = done >= 7 ? "평온함" : done >= 4 ? "나아짐" : done >= 2 ? "조금 화남" : "화가 남";
       
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-3 sm:gap-4 lg:gap-8 p-4 sm:p-6 lg:p-8 select-none anim-zoom max-w-4xl mx-auto w-full min-h-0">
+        <div className="flex flex-col items-center justify-between h-full gap-2 lg:gap-3 p-3 lg:p-4 select-none anim-zoom max-w-4xl mx-auto w-full min-h-0">
           <div className="text-center shrink-0">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-blue-600 font-jua">풍선 호흡하기 🎈</h2>
-            <div className="mt-2 lg:mt-4 bg-blue-100 text-blue-800 px-4 py-2 sm:px-6 lg:px-8 lg:py-3 rounded-full font-black inline-block text-xl sm:text-2xl lg:text-3xl">성공: {done} / {total}</div>
+            <h2 className="text-2xl lg:text-3xl font-black text-blue-600 font-jua">풍선 호흡하기 🎈</h2>
+            <div className="mt-1 lg:mt-2 bg-blue-100 text-blue-800 px-4 py-1.5 lg:px-6 lg:py-2 rounded-full font-black inline-block text-lg lg:text-2xl">성공: {done} / {total}</div>
           </div>
-          <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 my-1 sm:my-2 lg:my-4 flex-1 min-h-0">
+          
+          <div className="flex items-center gap-3 lg:gap-5 flex-1 min-h-0 justify-center">
             <div className="flex flex-col items-center shrink-0">
-              <div className="text-[3rem] sm:text-[4rem] lg:text-[5rem] transition-all bg-white shadow-xl rounded-full w-20 h-20 sm:w-28 sm:h-28 lg:w-32 lg:h-32 flex items-center justify-center border-4 border-slate-200">{face}</div>
-              <span className="text-base sm:text-xl lg:text-2xl font-black text-slate-500 mt-2">{faceWord}</span>
+              <div className="text-[2.5rem] lg:text-[4rem] transition-all bg-white shadow-xl rounded-full w-16 h-16 lg:w-24 lg:h-24 flex items-center justify-center border-4 border-slate-200">{face}</div>
+              <span className="text-base lg:text-xl font-black text-slate-500 mt-1 lg:mt-2">{faceWord}</span>
             </div>
-            <div className="w-44 h-44 sm:w-64 sm:h-64 lg:w-[24rem] lg:h-[24rem] bg-blue-50 rounded-[2rem] sm:rounded-[2.5rem] lg:rounded-[3rem] shadow-inner border-[8px] sm:border-[12px] lg:border-[16px] border-blue-200 flex items-center justify-center overflow-hidden relative shrink-0">
-              <div className="absolute top-2 left-2 sm:top-4 sm:left-4 text-2xl sm:text-3xl lg:text-4xl opacity-50">🎈</div>
-              <div className="bg-red-400 rounded-full shadow-2xl flex items-center justify-center" style={{ width: 60, height: 60, transform: `scale(${scale})` }}>
-                <span className="text-white text-lg sm:text-2xl lg:text-3xl font-black font-jua">후~</span>
+            <div className="w-40 h-40 lg:w-64 lg:h-64 bg-blue-50 rounded-[1.5rem] lg:rounded-[2.5rem] shadow-inner border-[8px] lg:border-[14px] border-blue-200 flex items-center justify-center overflow-hidden relative shrink-0">
+              <div className="absolute top-1 left-1 lg:top-3 lg:left-3 text-2xl lg:text-3xl opacity-50">🎈</div>
+              <div className="bg-red-400 rounded-full shadow-2xl flex items-center justify-center" style={{ width: 50, height: 50, transform: `scale(${scale})` }}>
+                <span className="text-white text-base lg:text-2xl font-black font-jua">후~</span>
               </div>
             </div>
           </div>
+          
           {!fin ? 
-            <button onMouseDown={start} onMouseUp={stop} onMouseLeave={stop} onTouchStart={e => { e.preventDefault(); start(); }} onTouchEnd={stop} className="w-full py-4 sm:py-6 lg:py-8 bg-blue-500 text-white rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] text-2xl sm:text-3xl lg:text-5xl font-black shadow-[0_6px_0_#1e40af] sm:shadow-[0_8px_0_#1e40af] lg:shadow-[0_10px_0_#1e40af] active:translate-y-2 active:shadow-none font-jua shrink-0">🎈 꾹~ 누르기</button> :
-            <button onClick={() => onDone({ record: `풍선 호흡 ${total}번 완료` })} className="w-full py-4 sm:py-6 lg:py-8 bg-green-500 text-white rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] text-2xl sm:text-3xl lg:text-5xl font-black shadow-[0_6px_0_#166534] sm:shadow-[0_8px_0_#166534] lg:shadow-[0_10px_0_#166534] anim-bounce font-jua shrink-0">마음이 편안해졌어! ✨</button>
+            <button onMouseDown={start} onMouseUp={stop} onMouseLeave={stop} onTouchStart={e => { e.preventDefault(); start(); }} onTouchEnd={stop} className="w-full max-w-2xl py-4 lg:py-6 bg-blue-500 text-white rounded-2xl lg:rounded-[2rem] text-2xl lg:text-4xl font-black shadow-[0_6px_0_#1e40af] lg:shadow-[0_8px_0_#1e40af] active:translate-y-2 active:shadow-none font-jua shrink-0">🎈 꾹~ 누르기</button> :
+            <button onClick={() => onDone({ record: `풍선 호흡 ${total}번 완료` })} className="w-full max-w-2xl py-4 lg:py-6 bg-green-500 text-white rounded-2xl lg:rounded-[2rem] text-2xl lg:text-4xl font-black shadow-[0_6px_0_#166534] lg:shadow-[0_8px_0_#166534] anim-bounce font-jua shrink-0">마음이 편안해졌어! ✨</button>
           }
         </div>
       );
     };
 
-    // ===== 마음 지우개 =====
+    // ===== 마음 지우개 - 콘텐츠 크기 조정 =====
     const AScrub = ({ onDone }) => {
       const [dirt, setDirt] = useState(1);
       const hm = useCallback(() => setDirt(d => Math.max(0, d - 0.005)), []);
@@ -804,24 +803,28 @@
       }, [done]);
       
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8 anim-zoom max-w-4xl mx-auto w-full min-h-0" onMouseMove={hm} onTouchMove={e => { e.preventDefault(); hm(); }}>
+        <div className="flex flex-col items-center justify-between h-full gap-2 lg:gap-3 p-3 lg:p-4 anim-zoom max-w-4xl mx-auto w-full min-h-0" onMouseMove={hm} onTouchMove={e => { e.preventDefault(); hm(); }}>
           <div className="text-center shrink-0">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-green-700 font-jua mb-1 sm:mb-2">마음 지우개 🧽</h2>
-            <p className="text-slate-500 font-bold text-xl sm:text-2xl lg:text-4xl mt-1 sm:mt-3 leading-snug">화면을 손가락으로<br />쓱쓱 문질러요!</p>
+            <h2 className="text-2xl lg:text-3xl font-black text-green-700 font-jua">마음 지우개 🧽</h2>
+            <p className="text-slate-500 font-bold text-lg lg:text-2xl mt-1">화면을 손가락으로 쓱쓱 문질러요!</p>
           </div>
-          <div className={`relative w-56 h-56 sm:w-72 sm:h-72 lg:w-[26rem] lg:h-[26rem] ${fb} rounded-full shadow-2xl border-[12px] sm:border-[16px] lg:border-[20px] overflow-hidden transition-colors duration-500 my-2 sm:my-4 shrink-0`}>
-            <div className="absolute inset-0 flex items-center justify-center text-[6rem] sm:text-[8rem] lg:text-[12rem] anim-float">{face}</div>
-            <div className="absolute inset-0 bg-slate-800" style={{ opacity: dirt * 0.5 }}></div>
+          
+          <div className="flex-1 min-h-0 flex items-center justify-center">
+            <div className={`relative w-48 h-48 lg:w-72 lg:h-72 ${fb} rounded-full shadow-2xl border-[10px] lg:border-[16px] overflow-hidden transition-colors duration-500`}>
+              <div className="absolute inset-0 flex items-center justify-center text-[5rem] lg:text-[8rem] anim-float">{face}</div>
+              <div className="absolute inset-0 bg-slate-800" style={{ opacity: dirt * 0.5 }}></div>
+            </div>
           </div>
+          
           {dirt > 0 ? (
-            <div className="w-full space-y-2 sm:space-y-3 max-w-3xl shrink-0">
-              <div className="flex justify-between text-xl sm:text-2xl lg:text-4xl font-bold text-slate-400 px-3"><span>😡 화남</span><span>😊 평온</span></div>
-              <div className="w-full h-8 sm:h-10 lg:h-12 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+            <div className="w-full space-y-2 max-w-2xl shrink-0">
+              <div className="flex justify-between text-lg lg:text-2xl font-bold text-slate-400 px-3"><span>😡 화남</span><span>😊 평온</span></div>
+              <div className="w-full h-7 lg:h-10 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                 <div className="h-full bg-gradient-to-r from-red-500 to-green-500 rounded-full transition-all duration-100" style={{ width: `${(1 - dirt) * 100}%` }}></div>
               </div>
             </div>
           ) : 
-            <button onClick={() => onDone({ record: "나쁜 마음 비우기 성공 🧹" })} className="w-full max-w-2xl py-5 sm:py-7 lg:py-10 bg-green-600 text-white text-2xl sm:text-3xl lg:text-5xl font-black rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] anim-bounce shadow-[0_6px_0_#166534] sm:shadow-[0_8px_0_#166534] lg:shadow-[0_10px_0_#166534] font-jua shrink-0">깨끗해졌어요! 😊</button>
+            <button onClick={() => onDone({ record: "나쁜 마음 비우기 성공 🧹" })} className="w-full max-w-2xl py-4 lg:py-6 bg-green-600 text-white text-2xl lg:text-4xl font-black rounded-2xl lg:rounded-[2rem] anim-bounce shadow-[0_6px_0_#166534] lg:shadow-[0_8px_0_#166534] font-jua shrink-0">깨끗해졌어요! 😊</button>
           }
         </div>
       );
@@ -908,7 +911,7 @@
       );
     };
 
-    // ===== 다짐 녹음 - 글씨 크게, 여백만 줄임 =====
+    // ===== 다짐 녹음 - 글씨 크게 =====
     const AMissionRecord = ({ onDone, name }) => {
       const rec = useVoiceRecorder(name, "다짐");
       const [mode, setMode] = useState("voice");
@@ -958,23 +961,23 @@
         <div className="flex flex-col items-center h-full gap-2 lg:gap-2 p-3 lg:p-4 anim-zoom max-w-3xl mx-auto w-full min-h-0">
           <div className="text-center shrink-0 w-full">
             <h2 className="text-2xl lg:text-3xl font-black text-indigo-700 font-jua">🎤 나의 다짐 기록하기</h2>
-            <p className="text-base lg:text-lg font-bold text-slate-600 leading-snug break-keep">실천할 것을 표현해봐요! {retryCount > 0 && <span className="text-orange-500">🔄 {retryCount}번째 도전!</span>}</p>
+            <p className="text-lg lg:text-xl font-bold text-slate-600 leading-snug break-keep">실천할 것을 표현해봐요! {retryCount > 0 && <span className="text-orange-500">🔄 {retryCount}번째 도전!</span>}</p>
           </div>
           
           {!showRating && (
             <>
               <div className="w-full max-w-2xl shrink-0 flex gap-1 sm:gap-2 bg-slate-100 p-1 rounded-2xl shadow-inner">
-                <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "voice" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
+                <button onClick={() => { sfxClick(); setMode("voice"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "voice" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
                   🎙️ 음성으로
                 </button>
-                <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-base lg:text-lg font-black font-jua transition-all ${mode === "text" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
+                <button onClick={() => { sfxClick(); setMode("text"); }} className={`flex-1 py-2 lg:py-2.5 px-3 sm:px-4 rounded-xl text-lg lg:text-xl font-black font-jua transition-all ${mode === "text" ? "bg-indigo-500 text-white shadow-md" : "bg-white text-indigo-600 border-2 border-indigo-200"}`}>
                   ⌨️ 글자로
                 </button>
               </div>
               
-              <div className="bg-indigo-50 border-[3px] border-indigo-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-2.5 text-base lg:text-lg font-bold text-indigo-800 w-full max-w-2xl shadow-inner shrink-0">
-                <p className="text-indigo-500 text-sm lg:text-base font-jua">💡 이렇게 표현해봐요!</p>
-                <ul className="ml-2 break-keep leading-snug">
+              <div className="bg-indigo-50 border-[3px] border-indigo-200 rounded-2xl px-3 py-2 lg:px-4 lg:py-3 text-lg lg:text-xl font-bold text-indigo-800 w-full max-w-2xl shadow-inner shrink-0">
+                <p className="text-indigo-500 text-base lg:text-lg font-jua mb-1">💡 이렇게 표현해봐요!</p>
+                <ul className="ml-2 break-keep leading-snug space-y-0.5">
                   <li>"화가 나면 <span className="text-indigo-600">풍선 호흡</span>을 할 거예요!"</li>
                   <li>"친구가 아프면 <span className="text-indigo-600">위로</span>해 줄 거예요!"</li>
                 </ul>
@@ -988,15 +991,15 @@
                   </div>
                   
                   {rec.state === "recording" && (rec.transcript || rec.interimText) && (
-                    <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-20 overflow-y-auto">
-                      <p className="text-sm text-red-500 font-bold">🎙️ 듣는 중...</p>
-                      <p className="text-base font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
+                    <div className="bg-white border-[3px] border-red-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 max-h-24 overflow-y-auto">
+                      <p className="text-base lg:text-lg text-red-500 font-bold">🎙️ 듣는 중...</p>
+                      <p className="text-lg lg:text-xl font-bold text-slate-700">{rec.transcript}<span className="text-slate-400">{rec.interimText}</span></p>
                     </div>
                   )}
                   {rec.state === "done" && rec.transcript && (
-                    <div className="bg-indigo-50 border-[3px] border-indigo-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-20 overflow-y-auto">
-                      <p className="text-sm text-indigo-600 font-bold">📝 내가 말한 다짐:</p>
-                      <p className="text-base font-bold text-slate-700 break-keep">{rec.transcript}</p>
+                    <div className="bg-indigo-50 border-[3px] border-indigo-300 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-24 overflow-y-auto">
+                      <p className="text-base lg:text-lg text-indigo-600 font-bold">📝 내가 말한 다짐:</p>
+                      <p className="text-lg lg:text-xl font-bold text-slate-700 break-keep">{rec.transcript}</p>
                     </div>
                   )}
                   
@@ -1014,8 +1017,8 @@
                   {rec.state === "done" && (
                     <div className="w-full max-w-2xl flex flex-col gap-1.5 shrink-0">
                       {rec.audioUrl && <audio src={rec.audioUrl} controls className="w-full h-9 rounded-full border-[3px] border-indigo-100 bg-indigo-50 shadow-inner" />}
-                      {rec.uploadStatus === "uploading" && <p className="text-sm text-indigo-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
-                      {rec.uploadStatus === "done" && <p className="text-sm text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
+                      {rec.uploadStatus === "uploading" && <p className="text-base lg:text-lg text-indigo-600 font-bold text-center anim-pulse">☁️ 드라이브에 저장 중...</p>}
+                      {rec.uploadStatus === "done" && <p className="text-base lg:text-lg text-green-600 font-bold text-center">✅ 드라이브 저장 완료!</p>}
                       <div className="flex gap-2 w-full">
                         <button onClick={rec.reset} disabled={rec.uploadStatus === "uploading"} className="flex-[0.4] py-2 lg:py-3 bg-orange-400 text-white rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#ea580c] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">↺ 다시</button>
                         <button onClick={handleVoiceSubmit} disabled={rec.uploadStatus === "uploading"} className="flex-1 py-2 lg:py-3 bg-amber-500 text-white text-lg lg:text-xl font-black rounded-2xl shadow-[0_4px_0_#b45309] active:translate-y-1 active:shadow-none font-jua disabled:opacity-50">{rec.uploadStatus === "uploading" ? "저장 중..." : "⭐ 스티커 평가"}</button>
@@ -1034,7 +1037,7 @@
                     className="w-full max-w-2xl flex-1 min-h-[80px] p-3 bg-white border-[3px] border-indigo-200 rounded-2xl text-lg lg:text-xl font-bold text-slate-700 focus:outline-none focus:border-indigo-400 resize-none shadow-inner shrink"
                     maxLength={300}
                   />
-                  <p className="text-sm text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
+                  <p className="text-base text-slate-400 text-right w-full max-w-2xl shrink-0">{textInput.length}/300자</p>
                   <div className="w-full max-w-2xl flex gap-2 shrink-0">
                     <button onClick={() => onDone({ record: "다짐 건너뛰기 ⏩", transcript: "" })} className="px-4 py-3 lg:py-4 bg-slate-300 text-slate-700 rounded-2xl text-lg lg:text-xl font-black shadow-[0_4px_0_#94a3b8] active:translate-y-1 active:shadow-none font-jua whitespace-nowrap">건너뛰기</button>
                     <button onClick={handleTextSubmit} className="flex-1 py-3 lg:py-4 bg-amber-500 text-white rounded-2xl text-xl lg:text-2xl font-black shadow-[0_5px_0_#b45309] active:translate-y-1 active:shadow-none font-jua">⭐ 스티커 평가</button>
@@ -1047,9 +1050,9 @@
           {showRating && (
             <>
               {submittedText && (
-                <div className="bg-slate-50 border-[3px] border-slate-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-20 overflow-y-auto">
-                  <p className="text-sm text-slate-500 font-bold">📝 나의 다짐:</p>
-                  <p className="text-base font-bold text-slate-700 break-keep">{submittedText}</p>
+                <div className="bg-slate-50 border-[3px] border-slate-200 rounded-2xl px-3 py-2 w-full max-w-2xl shrink-0 shadow-inner max-h-24 overflow-y-auto">
+                  <p className="text-base lg:text-lg text-slate-500 font-bold">📝 나의 다짐:</p>
+                  <p className="text-lg lg:text-xl font-bold text-slate-700 break-keep">{submittedText}</p>
                 </div>
               )}
               <StarRating onSubmit={onRatingSubmit} onRetry={onRetry} />
@@ -1251,50 +1254,57 @@
         };
 
         return (
-          <div className="w-full h-full bg-gradient-to-b from-indigo-200 to-purple-300 flex p-3 sm:p-4 lg:p-6 overflow-hidden items-center justify-center relative">
-            <button onClick={toggleTTS} className={`absolute top-3 sm:top-4 lg:top-6 left-3 sm:left-4 lg:left-6 flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 rounded-2xl active:scale-95 shadow-md border-[3px] font-black font-jua text-base sm:text-xl lg:text-2xl transition-colors z-50 ${ttsOn ? "bg-white border-indigo-200 text-indigo-600" : "bg-slate-200 border-slate-300 text-slate-500"}`}>
-              {ttsOn ? <><IVol s={24} /> 소리</> : <><IMute s={24} /> 소리</>}
+          <div className="w-full h-full bg-gradient-to-b from-indigo-200 to-purple-300 flex p-2 sm:p-3 lg:p-4 overflow-hidden items-center justify-center relative">
+            <button onClick={toggleTTS} className={`absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl active:scale-95 shadow-md border-[3px] font-black font-jua text-base sm:text-lg lg:text-xl transition-colors z-50 ${ttsOn ? "bg-white border-indigo-200 text-indigo-600" : "bg-slate-200 border-slate-300 text-slate-500"}`}>
+              {ttsOn ? <><IVol s={22} /> 소리</> : <><IMute s={22} /> 소리</>}
             </button>
-            <div className="bg-white p-4 sm:p-5 lg:p-8 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border-[8px] sm:border-[10px] lg:border-[12px] border-yellow-400 w-full max-w-5xl flex flex-col items-center anim-zoom relative max-h-full overflow-hidden">
-              <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 text-3xl sm:text-4xl lg:text-5xl anim-spin z-10">⭐</div>
-              <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 text-3xl sm:text-4xl lg:text-5xl anim-spin z-10">⭐</div>
-              <div className="text-[3rem] sm:text-[4rem] lg:text-[5rem] anim-float leading-none -mt-1 sm:-mt-2 shrink-0 relative z-20">🎓</div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-indigo-900 font-jua border-b-[4px] sm:border-b-[6px] border-yellow-400 pb-1 sm:pb-2 px-6 sm:px-10 shrink-0">수 료 증</h2>
-              <div className="text-center mt-2 sm:mt-3 shrink-0 flex items-center justify-center gap-2 flex-wrap">
-                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-800 font-jua border-b-[3px] sm:border-b-[4px] border-green-400 pb-1 px-4 sm:px-6">{name || "어린이"}</span>
+            <div className="bg-white p-3 sm:p-4 lg:p-5 rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl border-[6px] sm:border-[8px] lg:border-[10px] border-yellow-400 w-full max-w-4xl flex flex-col items-center anim-zoom relative max-h-full overflow-hidden gap-1.5 lg:gap-2">
+              <div className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 text-3xl sm:text-4xl anim-spin z-10">⭐</div>
+              <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 text-3xl sm:text-4xl anim-spin z-10">⭐</div>
+              
+              <div className="text-[2.5rem] sm:text-[3.5rem] lg:text-[4rem] anim-float leading-none shrink-0 relative z-20">🎓</div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-indigo-900 font-jua border-b-[4px] sm:border-b-[5px] border-yellow-400 pb-1 px-6 sm:px-10 shrink-0">수 료 증</h2>
+              
+              <div className="text-center shrink-0 flex items-center justify-center gap-2 flex-wrap">
+                <span className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-800 font-jua border-b-[3px] border-green-400 pb-0.5 px-4 sm:px-6">{name || "어린이"}</span>
                 <span className="text-base sm:text-xl lg:text-2xl font-bold text-slate-600">어린이</span>
               </div>
-              <p className="text-base sm:text-xl lg:text-2xl font-black text-amber-500 font-jua mt-1 sm:mt-2 shrink-0 bg-amber-50 px-4 py-1 sm:px-6 sm:py-2 rounded-full border-[2px] sm:border-[3px] border-amber-200">🏅 마음 튼튼 새싹상</p>
-              <div className="bg-slate-50 px-3 sm:px-5 lg:px-6 py-2 sm:py-3 lg:py-4 rounded-2xl sm:rounded-3xl border-[4px] sm:border-[6px] border-indigo-100 text-center w-full mt-2 sm:mt-3 shadow-sm shrink-0 flex flex-col items-center gap-1 sm:gap-2 lg:gap-3">
-                <div className="text-sm sm:text-lg lg:text-xl font-black text-slate-800 break-keep leading-tight lg:leading-relaxed font-jua">
+              
+              <p className="text-base sm:text-lg lg:text-xl font-black text-amber-500 font-jua shrink-0 bg-amber-50 px-4 py-1 sm:px-6 sm:py-1.5 rounded-full border-[2px] sm:border-[3px] border-amber-200">🏅 마음 튼튼 새싹상</p>
+              
+              <div className="bg-slate-50 px-3 sm:px-4 lg:px-5 py-2 sm:py-2.5 rounded-2xl border-[4px] sm:border-[5px] border-indigo-100 text-center w-full shadow-sm shrink-0 flex flex-col items-center gap-1 sm:gap-1.5">
+                <div className="text-sm sm:text-base lg:text-lg font-black text-slate-800 break-keep leading-snug font-jua">
                   위 어린이는 스스로 마음을 공부하고 훈련하여
-                  <div className="flex justify-center gap-1 sm:gap-1.5 lg:gap-2 my-1 sm:my-2 lg:my-3 flex-wrap">
-                    {Array.from({ length: 9 }).map((_, i) => (<IHeart key={i} s={20} fill="#ef4444" c="text-red-400" />))}
+                  <div className="flex justify-center gap-1 sm:gap-1.5 my-1 flex-wrap">
+                    {Array.from({ length: 9 }).map((_, i) => (<IHeart key={i} s={18} fill="#ef4444" c="text-red-400" />))}
                   </div>
-                  <span className="text-green-600 text-lg sm:text-2xl lg:text-3xl">9개의 사랑의 하트</span>를 모두 모았기에<br />
+                  <span className="text-green-600 text-base sm:text-lg lg:text-xl">9개의 사랑의 하트</span>를 모두 모았기에<br />
                   이 상장을 아낌없이 칭찬하며 드립니다. 🌟
                 </div>
               </div>
-              <div className="w-full bg-indigo-50 rounded-2xl sm:rounded-3xl p-3 sm:p-4 lg:p-5 border-[4px] sm:border-[6px] border-indigo-100 mt-2 sm:mt-3 overflow-y-auto mb-2 min-h-0 flex-1 shadow-inner">
-                <h3 className="text-base sm:text-xl lg:text-2xl font-black text-indigo-800 text-center mb-2 sm:mb-3 font-jua">🌱 나의 마음 공부 기록</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              
+              <div className="w-full bg-indigo-50 rounded-2xl p-2 sm:p-3 border-[4px] sm:border-[5px] border-indigo-100 overflow-y-auto min-h-0 flex-1 shadow-inner">
+                <h3 className="text-base sm:text-lg lg:text-xl font-black text-indigo-800 text-center mb-1.5 sm:mb-2 font-jua">🌱 나의 마음 공부 기록</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                   {Object.entries(records).length > 0 ? Object.entries(records).map((entry, i) => {
                     const missionName = entry[0]; const recordText = entry[1];
                     return (
-                      <div key={i} className="flex flex-col bg-white p-2 sm:p-3 lg:p-4 rounded-xl sm:rounded-2xl border-[2px] sm:border-[3px] border-indigo-50 min-w-0 shadow-sm">
-                        <span className="text-indigo-600 font-black text-sm sm:text-base lg:text-lg mb-0.5 sm:mb-1 truncate font-jua">{missionName}</span>
-                        <span className="text-slate-700 font-bold text-xs sm:text-sm lg:text-base break-keep">{recordText}</span>
+                      <div key={i} className="flex flex-col bg-white p-1.5 sm:p-2 rounded-xl border-[2px] border-indigo-50 min-w-0 shadow-sm">
+                        <span className="text-indigo-600 font-black text-sm sm:text-base mb-0.5 truncate font-jua">{missionName}</span>
+                        <span className="text-slate-700 font-bold text-xs sm:text-sm break-keep">{recordText}</span>
                       </div>
                     );
                   }) : (
-                    <div className="col-span-2 text-center text-slate-400 font-bold py-4 text-base sm:text-xl">배움 기록이 없습니다.</div>
+                    <div className="col-span-2 text-center text-slate-400 font-bold py-4 text-base">배움 기록이 없습니다.</div>
                   )}
                 </div>
               </div>
-              <p className="text-xs sm:text-sm lg:text-base font-bold text-slate-400 shrink-0 mb-2">{new Date().toLocaleDateString("ko-KR")} 마음 튼튼 새싹 학교 🏫</p>
-              <div className="flex gap-2 sm:gap-3 lg:gap-5 w-full shrink-0">
-                <button onClick={() => { setScreen("name"); setActState("idle"); setMId(1); setHearts(0); setRecords({}); }} className="flex-[0.4] py-3 sm:py-4 lg:py-5 bg-slate-200 text-slate-700 rounded-[1.5rem] sm:rounded-[2rem] text-base sm:text-xl lg:text-2xl font-black active:scale-95 shadow-md border-b-[5px] sm:border-b-[6px] border-slate-300 active:border-b-0 active:translate-y-1 font-jua">처음으로 🏠</button>
-                <button onClick={downloadReport} className="flex-1 py-3 sm:py-4 lg:py-5 bg-indigo-500 text-white rounded-[1.5rem] sm:rounded-[2rem] text-lg sm:text-2xl lg:text-3xl font-black active:scale-95 shadow-[0_6px_0_#3730a3] sm:shadow-[0_8px_0_#3730a3] border-indigo-600 active:border-b-0 active:translate-y-2 font-jua anim-bounce text-center">🏆 수료증 받기</button>
+              
+              <p className="text-xs sm:text-sm font-bold text-slate-400 shrink-0">{new Date().toLocaleDateString("ko-KR")} 마음 튼튼 새싹 학교 🏫</p>
+              
+              <div className="flex gap-2 sm:gap-3 w-full shrink-0">
+                <button onClick={() => { setScreen("name"); setActState("idle"); setMId(1); setHearts(0); setRecords({}); }} className="flex-[0.4] py-2.5 sm:py-3 lg:py-4 bg-slate-200 text-slate-700 rounded-2xl text-base sm:text-xl font-black active:scale-95 shadow-md border-b-[5px] border-slate-300 active:border-b-0 active:translate-y-1 font-jua">처음으로 🏠</button>
+                <button onClick={downloadReport} className="flex-1 py-2.5 sm:py-3 lg:py-4 bg-indigo-500 text-white rounded-2xl text-lg sm:text-xl lg:text-2xl font-black active:scale-95 shadow-[0_5px_0_#3730a3] sm:shadow-[0_6px_0_#3730a3] border-indigo-600 active:border-b-0 active:translate-y-2 font-jua anim-bounce text-center">🏆 수료증 받기</button>
               </div>
             </div>
           </div>
